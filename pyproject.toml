@@ -17,13 +17,14 @@ classifiers = [
 requires-python = ">=3.10"
 dependencies = [
   "echopype>=0.10.0",
-  "fsspec",
+  "xarray>=2024.11.0",
+  "fsspec>2024.10.0",
   "requests",
-  "s3fs",
+  "s3fs>2024.6.0",
   "loguru",
   "tqdm",
   "xarray",
-  "zarr",
+  "zarr>=2,<3",
   "prefect>3.0.3",
   "prefect-aws",
   "pydantic>2",
