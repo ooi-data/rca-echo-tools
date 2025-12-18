@@ -26,11 +26,10 @@ dependencies = [
   "zarr>=2,<3",
   "prefect>3.0.3",
   "prefect-aws",
-  "pydantic>2",
-  "pydantic-settings"
 ]
 
 [project.scripts]
+rca-echo-harvest = "rca_echo_tools.harvest:refresh_full_echo_ds"
 
 [tool.ruff]
 line-length = 95

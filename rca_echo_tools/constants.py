@@ -1,8 +1,9 @@
 from datetime import datetime
 
-ZARR_DAY_0 = datetime(2025, 9, 1)
+#ZARR_DAY_0 = datetime(2025, 9, 1) #TODO remove?
 
 DATA_BUCKET = "s3://ooi-data"
+TEST_BUCKET = "s3://temp-ooi-data-prod" # TODO
 
 VIZ_BUCKET = "s3://ooi-rca-qaqc-prod"
 
@@ -12,3 +13,9 @@ ECHO_REFDES_LIST = [
 ]
 
 SUFFIX = "streamed-zplsc_volume_scattering"
+
+OFFSHORE_CHUNKING = {
+    "ping_time": 512,
+    "range_sample": -1,
+    "channel": -1,
+}
