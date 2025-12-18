@@ -1,6 +1,7 @@
 """module for harvesting .raw echosounder data and writing to chunked zarr store"""
 import fsspec
-import click 
+import click
+import zarr 
 
 import xarray as xr
 import echopype as ep
@@ -75,11 +76,15 @@ def refresh_full_echo_ds(
     logger.info(combined_ds['ping_time'])
 
     logger.info("writing complete dataset to zarr store")
+    store_path = f"{data_bucket}/{refdes}-{SUFFIX}/"
     combined_ds.chunk(OFFSHORE_CHUNKING)
     combined_ds.to_zarr(
-        f"{data_bucket}/{refdes}-{SUFFIX}/", 
+        store_path, 
         mode="w", 
         storage_options=fs_kwargs)
+    
+    logger.info("Consolidating zarr metadata.")
+    zarr.consolidate_metadata(store_path, storage_options=fs_kwargs)
     
 
 def get_raw_urls(day_str: str, refdes: str):
@@ -104,3 +109,6 @@ def get_raw_urls(day_str: str, refdes: str):
         return None
 
     return data_url_list
+
+if __name__ == "__main__":
+    refresh_full_echo_ds()
