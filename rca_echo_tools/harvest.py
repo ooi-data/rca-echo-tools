@@ -12,23 +12,23 @@ from rca_echo_tools.utils import select_logger, get_s3_kwargs
 
 
 @click.command()
-@click.option("--start_date", required=True, type=str, help="Start date in YYYY/MM/DD format")
-@click.option("--end_date", required=True, type=str, help="End date in YYYY/MM/DD format")
+@click.option("--start-date", required=True, type=str, help="Start date in YYYY/MM/DD format")
+@click.option("--end-date", required=True, type=str, help="End date in YYYY/MM/DD format")
 @click.option("--refdes", required=True, type=str, help="Reference designator of the echosounder")
 @click.option(
-    "--waveform_mode",
+    "--waveform-mode",
     required=True,
     type=click.Choice(["CW", "BB"], case_sensitive=False),
     help="Waveform mode: CW or BB"
 )
 @click.option(
-    "--encode_mode",
+    "--encode-mode",
     required=True,
     type=click.Choice(["power", "complex"], case_sensitive=False),
     help="Encode mode: power or complex"
 )
-@click.option("--sonar_model", required=True, type=str, help="Sonar model: EK80 or EK60")
-@click.option("--data_bucket", required=False, type=str, default=TEST_BUCKET, help="S3 bucket to write zarr store to")
+@click.option("--sonar-model", required=True, type=str, help="Sonar model: EK80 or EK60")
+@click.option("--data-bucket", required=False, type=str, default=TEST_BUCKET, help="S3 bucket to write zarr store to")
 def refresh_full_echo_ds(
     start_date: str, 
     end_date: str, 
