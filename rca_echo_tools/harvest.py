@@ -182,7 +182,7 @@ def clean_Sv_ds(ds_Sv: xr.Dataset, logger):
 
     for var in ds_Sv.data_vars:
         if var in VARIABLES_TO_EXCLUDE:
-            logger.info("Dropping variable: {var}")
+            logger.info(f"Dropping variable: {var}")
             ds_Sv = ds_Sv.drop_vars(var)
     
     return ds_Sv
