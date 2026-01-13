@@ -19,7 +19,7 @@ deployments:
   version:
   tags: []
   description:
-  entrypoint: ./ooi_echo_tools/pipeline.py:run_echo_raw_data_harvest
+  entrypoint: ./rca_echo_tools/harvest.py:echo_raw_data_harvest
   parameters: {}
   work_pool:
     name: hydrophone-pool
