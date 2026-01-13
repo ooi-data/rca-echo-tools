@@ -1,9 +1,7 @@
 """module for harvesting .raw echosounder data and writing to chunked zarr store"""
-import sys
 import fsspec
 import click
 import zarr 
-import faulthandler
 import warnings
 
 import xarray as xr
@@ -50,7 +48,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
         "Append will append to existing zarrs store along `ping_time` dimension.",
     default="append"
 )
-def refresh_full_echo_ds(
+def echo_raw_data_harvest(
     start_date: str,
     end_date: str,
     refdes: str,
@@ -134,7 +132,8 @@ def refresh_full_echo_ds(
         # 3. Write / append to Zarr
         write_mode = "w" if not store_exists else "a"
 
-        logger.info("Writing batch to Zarr store.")
+        # TODO check what auto chunking is doing?
+        logger.info("------ Writing batch to Zarr store. ------")
         combined_ds.to_zarr(
             store_path,
             mode=write_mode,
@@ -180,13 +179,16 @@ def get_raw_urls(day_str: str, refdes: str):
 
 def clean_Sv_ds(ds_Sv: xr.Dataset, logger):
 
+    var_dropped_list = []
     for var in ds_Sv.data_vars:
         if var in VARIABLES_TO_EXCLUDE:
-            logger.info(f"Dropping variable: {var}")
+            var_dropped_list.append(var)
             ds_Sv = ds_Sv.drop_vars(var)
+    
+    logger.info(f"Dropped variables from Sv dataset: {var_dropped_list}")
     
     return ds_Sv
 
 
 if __name__ == "__main__":
-    refresh_full_echo_ds()
+    echo_raw_data_harvest()
