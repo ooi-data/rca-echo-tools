@@ -11,7 +11,13 @@ import echopype as ep
 
 from tqdm import tqdm
 from datetime import datetime, timedelta
-from rca_echo_tools.constants import DATA_BUCKET, TEST_BUCKET, OFFSHORE_CHUNKING, SUFFIX
+from rca_echo_tools.constants import (
+    DATA_BUCKET, 
+    TEST_BUCKET, 
+    OFFSHORE_CHUNKING, 
+    SUFFIX,
+    VARIABLES_TO_EXCLUDE
+)
 from rca_echo_tools.utils import select_logger, get_s3_kwargs
 
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -112,7 +118,10 @@ def refresh_full_echo_ds(
                 waveform_mode=waveform_mode,
                 encode_mode=encode_mode,
             )
-            # TODO TODO TODO variable validation here
+
+            # TODO variable validation here
+            ds_Sv = clean_Sv_ds(ds_Sv, logger)
+
             Sv_list.append(ds_Sv)
 
             del ed
@@ -167,6 +176,17 @@ def get_raw_urls(day_str: str, refdes: str):
         return None
 
     return data_url_list
+
+
+def clean_Sv_ds(ds_Sv: xr.Dataset, logger):
+
+    for var in ds_Sv.data_vars:
+        if var in VARIABLES_TO_EXCLUDE:
+            logger.info("Dropping variable: {var}")
+            ds_Sv = ds_Sv.drop_vars(var)
+    
+    return ds_Sv
+
 
 if __name__ == "__main__":
     refresh_full_echo_ds()
