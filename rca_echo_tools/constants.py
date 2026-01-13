@@ -1,6 +1,7 @@
 from datetime import datetime
 
-#ZARR_DAY_0 = datetime(2025, 9, 1) #TODO remove?
+#ZARR_DAY_0 = datetime(2025, 9, 1) #TODO remove? or have some constant about 
+# time periods when echosounders were in different modes 
 
 DATA_BUCKET = "s3://ooi-data"
 TEST_BUCKET = "s3://temp-ooi-data-prod" # TODO
@@ -18,4 +19,5 @@ OFFSHORE_CHUNKING = {
     "ping_time": 512,
     "range_sample": -1,
     "channel": -1,
+    "filenames": -1,
 }
