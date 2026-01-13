@@ -8,6 +8,7 @@ import xarray as xr
 import echopype as ep
 
 from tqdm import tqdm
+from prefect import flow
 from datetime import datetime, timedelta
 from rca_echo_tools.constants import (
     DATA_BUCKET, 
@@ -21,6 +22,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 
 # we need to write to zarr at intervals instead of concatenating the whole thing TODO
 # batch processing pattern TODO
+@flow()
 def echo_raw_data_harvest(
     start_date: str,
     end_date: str,
