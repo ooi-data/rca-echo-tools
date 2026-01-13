@@ -1,7 +1,10 @@
 """module for harvesting .raw echosounder data and writing to chunked zarr store"""
+import sys
 import fsspec
 import click
 import zarr 
+import faulthandler
+import warnings
 
 import xarray as xr
 import echopype as ep
@@ -11,7 +14,10 @@ from datetime import datetime, timedelta
 from rca_echo_tools.constants import DATA_BUCKET, TEST_BUCKET, OFFSHORE_CHUNKING, SUFFIX
 from rca_echo_tools.utils import select_logger, get_s3_kwargs
 
+warnings.filterwarnings("ignore", category=FutureWarning)
 
+# we need to write to zarr at intervals instead of concatenating the whole thing TODO
+# batch processing pattern TODO
 @click.command()
 @click.option("--start-date", required=True, type=str, help="Start date in YYYY/MM/DD format")
 @click.option("--end-date", required=True, type=str, help="End date in YYYY/MM/DD format")
@@ -30,61 +36,113 @@ from rca_echo_tools.utils import select_logger, get_s3_kwargs
 )
 @click.option("--sonar-model", required=True, type=str, help="Sonar model: EK80 or EK60")
 @click.option("--data-bucket", required=False, type=str, default=TEST_BUCKET, help="S3 bucket to write zarr store to")
+@click.option(
+    "--run-type",
+    required=False,
+    type=click.Choice(["append", "refresh"], case_sensitive=False),
+    help="Type of pipeline run. Refresh will overwrite existing zarr store with specified date range."
+        "Append will append to existing zarrs store along `ping_time` dimension.",
+    default="append"
+)
 def refresh_full_echo_ds(
-    start_date: str, 
-    end_date: str, 
+    start_date: str,
+    end_date: str,
     refdes: str,
-    waveform_mode: str, #CW or BB
-    encode_mode: str, #power or complex
-    sonar_model: str, #EK80 or EK60
-    data_bucket: str
-    ) -> None:
+    waveform_mode: str,
+    encode_mode: str,
+    sonar_model: str,
+    data_bucket: str,
+    run_type: str,
+    batch_size_days: int = 2,
+) -> None:
 
     logger = select_logger()
     fs_kwargs = get_s3_kwargs()
+    fs = fsspec.filesystem("s3", **fs_kwargs)
+
+    store_path = f"{data_bucket}/{refdes}-{SUFFIX}/"
+    store = fs.get_mapper(store_path)
+    store_exists = fs.exists(store_path)
+    if run_type == "refresh" and store_exists:
+        raise FileExistsError("`--refresh` specified, but zarr store already exists. Please either" \
+        "delete existing store and run refesh again, or specify `--append` if you just wish to append" \
+        "to existing store.")
+
     start_dt = datetime.strptime(start_date, "%Y/%m/%d")
     end_dt = datetime.strptime(end_date, "%Y/%m/%d")
 
-    full_url_list = []
-    while start_dt <= end_dt:
-        daily_url_list = get_raw_urls(start_dt.strftime("%Y/%m/%d"), refdes)
+    batch_start = start_dt
 
-        if daily_url_list is not None:
-            logger.info(f"Found {len(daily_url_list)} files for {start_dt.strftime('%Y/%m/%d')}")
-            full_url_list.extend(daily_url_list)
+    while batch_start <= end_dt:
+        batch_end = min(
+            batch_start + timedelta(days=batch_size_days - 1),
+            end_dt,
+        )
 
-        elif daily_url_list is None:
-            logger.warning(f"No data for {start_dt.strftime('%Y/%m/%d')}")
-        
-        start_dt += timedelta(days=1)
+        logger.info(
+            f"Processing batch {batch_start:%Y-%m-%d} → {batch_end:%Y-%m-%d}"
+        )
 
-    ed_list = [] # echopype data objects
-    for url in tqdm(full_url_list, desc="parsing raw data", unit="file"):
-        logger.info(f"Parsing raw data for {url}.")
-        ed = ep.open_raw(url, sonar_model=sonar_model)
-        ed_list.append(ed)
+        # 1. Collect URLs for this batch only
+        batch_urls = []
 
-    Sv_list = [] # scatter volume 
-    for ed in tqdm(ed_list, desc="generating sv", unit="data array"):
-        ds_Sv = ep.calibrate.compute_Sv(ed, waveform_mode=waveform_mode, encode_mode=encode_mode)
-        Sv_list.append(ds_Sv)
+        dt = batch_start
+        while dt <= batch_end:
+            daily_urls = get_raw_urls(dt.strftime("%Y/%m/%d"), refdes)
+            if daily_urls:
+                batch_urls.extend(daily_urls)
+            else:
+                logger.warning(f"No data for {dt:%Y-%m-%d}")
+            dt += timedelta(days=1)
 
-    logger.info("Concatenating all Sv arrays into single dataset.")
-    combined_ds = xr.concat(Sv_list, dim="ping_time")
+        if not batch_urls:
+            logger.warning("No data found for this batch, skipping...")
+            batch_start = batch_end + timedelta(days=1)
+            continue
 
-    logger.info("Combined dataset ping time dim:")
-    logger.info(combined_ds['ping_time'])
+        # 2. Parse + compute Sv for this batch
+        Sv_list = []
 
-    logger.info("writing complete dataset to zarr store")
-    store_path = f"{data_bucket}/{refdes}-{SUFFIX}/"
-    combined_ds.chunk(OFFSHORE_CHUNKING)
-    combined_ds.to_zarr(
-        store_path, 
-        mode="w", 
-        storage_options=fs_kwargs)
-    
-    logger.info("Consolidating zarr metadata.")
-    zarr.consolidate_metadata(store_path, storage_options=fs_kwargs)
+        for url in tqdm(batch_urls, desc="Parsing + computing Sv", unit="file"):
+            logger.info(f"Parsing raw data for {url}.")
+            ed = ep.open_raw(url, sonar_model=sonar_model)
+            logger.info(f"Computing Sv for {url}.")
+            ds_Sv = ep.calibrate.compute_Sv(
+                ed,
+                waveform_mode=waveform_mode,
+                encode_mode=encode_mode,
+            )
+            # TODO TODO TODO variable validation here
+            Sv_list.append(ds_Sv)
+
+            del ed
+
+        logger.info("<<< Concatenating Sv for this batch. >>>")
+        combined_ds = xr.concat(Sv_list, dim="ping_time", join="outer")
+
+        del Sv_list  # free up memory
+
+        # 3. Write / append to Zarr
+        write_mode = "w" if not store_exists else "a"
+
+        logger.info("Writing batch to Zarr store.")
+        combined_ds.to_zarr(
+            store_path,
+            mode=write_mode,
+            append_dim="ping_time" if store_exists else None,
+            storage_options=fs_kwargs,
+        )
+
+        store_exists = True 
+
+        del combined_ds  # free up memory
+
+        # 4. Move to next batch
+        batch_start = batch_end + timedelta(days=1)
+
+    # 5. Consolidate metadata ONCE
+    logger.info("Consolidating Zarr metadata")
+    zarr.consolidate_metadata(store)
     
 
 def get_raw_urls(day_str: str, refdes: str):
