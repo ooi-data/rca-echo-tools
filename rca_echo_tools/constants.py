@@ -31,3 +31,5 @@ VARIABLES_TO_EXCLUDE = [
     "beamwidth_alongship",
     "beamwidth_athwartship",
 ]
+
+HARVEST_DEPLOYMENT = "echo_raw_data_harvest_2vcpu_16gb"
