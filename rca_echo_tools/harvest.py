@@ -11,7 +11,6 @@ from tqdm import tqdm
 from datetime import datetime, timedelta
 from rca_echo_tools.constants import (
     DATA_BUCKET, 
-    TEST_BUCKET, 
     OFFSHORE_CHUNKING, 
     SUFFIX,
     VARIABLES_TO_EXCLUDE
@@ -22,32 +21,6 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 
 # we need to write to zarr at intervals instead of concatenating the whole thing TODO
 # batch processing pattern TODO
-@click.command()
-@click.option("--start-date", required=True, type=str, help="Start date in YYYY/MM/DD format")
-@click.option("--end-date", required=True, type=str, help="End date in YYYY/MM/DD format")
-@click.option("--refdes", required=True, type=str, help="Reference designator of the echosounder")
-@click.option(
-    "--waveform-mode",
-    required=True,
-    type=click.Choice(["CW", "BB"], case_sensitive=False),
-    help="Waveform mode: CW or BB"
-)
-@click.option(
-    "--encode-mode",
-    required=True,
-    type=click.Choice(["power", "complex"], case_sensitive=False),
-    help="Encode mode: power or complex"
-)
-@click.option("--sonar-model", required=True, type=str, help="Sonar model: EK80 or EK60")
-@click.option("--data-bucket", required=False, type=str, default=TEST_BUCKET, help="S3 bucket to write zarr store to")
-@click.option(
-    "--run-type",
-    required=False,
-    type=click.Choice(["append", "refresh"], case_sensitive=False),
-    help="Type of pipeline run. Refresh will overwrite existing zarr store with specified date range."
-        "Append will append to existing zarrs store along `ping_time` dimension.",
-    default="append"
-)
 def echo_raw_data_harvest(
     start_date: str,
     end_date: str,

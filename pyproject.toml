@@ -29,7 +29,7 @@ dependencies = [
 ]
 
 [project.scripts]
-rca-echo-harvest = "rca_echo_tools.harvest:echo_raw_data_harvest"
+rca-echo-harvest = "rca_echo_tools.pipeline:run_echo_raw_data_harvest"
 
 [tool.ruff]
 line-length = 95
