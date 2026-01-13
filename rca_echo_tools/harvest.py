@@ -70,8 +70,8 @@ def refresh_full_echo_ds(
     store = fs.get_mapper(store_path)
     store_exists = fs.exists(store_path)
     if run_type == "refresh" and store_exists:
-        raise FileExistsError("`--refresh` specified, but zarr store already exists. Please either" \
-        "delete existing store and run refesh again, or specify `--append` if you just wish to append" \
+        raise FileExistsError("`--refresh` specified, but zarr store already exists. Please either " \
+        "delete existing store and run refesh again, or specify `--append` if you just wish to append " \
         "to existing store.")
 
     start_dt = datetime.strptime(start_date, "%Y/%m/%d")
