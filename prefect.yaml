@@ -27,6 +27,6 @@ deployments:
     job_variables:
       cpu: 8192
       memory: 61440
-      image: jdduprey/rca-echo-tools:latest
+      image: jdduprey/rca-echo-tools:latest # overwrites the default image associated with the workpool
   schedule:
   is_schedule_active: true

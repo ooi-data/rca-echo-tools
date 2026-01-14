@@ -1,6 +1,5 @@
 """module for harvesting .raw echosounder data and writing to chunked zarr store"""
 import fsspec
-import click
 import zarr 
 import warnings
 
@@ -22,7 +21,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 
 # we need to write to zarr at intervals instead of concatenating the whole thing TODO
 # batch processing pattern TODO
-@flow()
+@flow(log_prints=True)
 def echo_raw_data_harvest(
     start_date: str,
     end_date: str,
