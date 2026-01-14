@@ -15,7 +15,7 @@ pull:
 
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
-- name: echo_raw_data_harvest_4vcpu_30gb
+- name: echo_raw_data_harvest_8vcpu_60gb
   version:
   tags: []
   description:
@@ -25,8 +25,8 @@ deployments:
     name: hydrophone-pool
     work_queue_name:
     job_variables:
-      cpu: 4096
-      memory: 30720
+      cpu: 8192
+      memory: 61440
       image: jdduprey/rca-echo-tools:latest
   schedule:
   is_schedule_active: true
