@@ -50,7 +50,7 @@ def run_echo_raw_data_harvest(
 ) -> None:
     
     logger = select_logger()
-    run_name = f"{refdes}__{start_date.replace('/', '-')}__{end_date.replace('/', '-')}"
+    run_name = f"{refdes}_{start_date.replace('/', '')}_{end_date.replace('/', '')}"
 
     if cloud:
         logger.info(f"Launching pipeline in cloud for {run_name}")
