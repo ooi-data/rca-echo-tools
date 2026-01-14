@@ -32,4 +32,4 @@ VARIABLES_TO_EXCLUDE = [
     "beamwidth_athwartship",
 ]
 
-HARVEST_DEPLOYMENT = "echo_raw_data_harvest_2vcpu_16gb"
+HARVEST_DEPLOYMENT = "echo_raw_data_harvest_4vcpu_30gb"
