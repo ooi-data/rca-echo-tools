@@ -6,7 +6,6 @@ import warnings
 import xarray as xr
 import echopype as ep
 
-from tqdm import tqdm
 from prefect import flow
 from datetime import datetime, timedelta
 from rca_echo_tools.constants import (
@@ -35,6 +34,8 @@ def echo_raw_data_harvest(
 ) -> None:
 
     logger = select_logger()
+    print("print logging test")
+    logger.info("logger logging test")
     fs_kwargs = get_s3_kwargs()
     fs = fsspec.filesystem("s3", **fs_kwargs)
 
@@ -81,7 +82,7 @@ def echo_raw_data_harvest(
         # 2. Parse + compute Sv for this batch
         Sv_list = []
 
-        for url in tqdm(batch_urls, desc="Parsing + computing Sv", unit="file"):
+        for url in batch_urls:
             logger.info(f"Parsing raw data for {url}.")
             ed = ep.open_raw(url, sonar_model=sonar_model)
             logger.info(f"Computing Sv for {url}.")

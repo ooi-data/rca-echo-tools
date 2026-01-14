@@ -22,7 +22,6 @@ dependencies = [
   "requests",
   "s3fs>2024.6.0",
   "loguru",
-  "tqdm",
   "zarr>=2,<3",
   "prefect>3.0.3",
   "prefect-aws",
