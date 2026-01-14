@@ -67,7 +67,7 @@ def run_echo_raw_data_harvest(
         }   
 
         run_deployment(
-            name=f"echo-raw-data-harvest/{HARVEST_DEPLOYMENT}",
+            name=f"echo-raw-data-harvest/echo_tools_16vcpu_80gb",
             parameters=params,
             flow_run_name=run_name,
             timeout=12,

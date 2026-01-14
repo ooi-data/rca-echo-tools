@@ -15,7 +15,7 @@ pull:
 
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
-- name: echo_raw_data_harvest_8vcpu_60gb
+- name: echo_tools_8vcpu_60gb
   version:
   tags: []
   description:
@@ -30,3 +30,20 @@ deployments:
       image: jdduprey/rca-echo-tools:latest # overwrites the default image associated with the workpool
   schedule:
   is_schedule_active: true
+- name: echo_tools_16vcpu_80gb
+  version:
+  tags: []
+  description:
+  entrypoint: ./rca_echo_tools/harvest.py:echo_raw_data_harvest
+  parameters: {}
+  work_pool:
+    name: hydrophone-pool
+    work_queue_name:
+    job_variables:
+      cpu: 16384
+      memory: 81920
+      image: jdduprey/rca-echo-tools:latest # overwrites the default image associated with the workpool
+  schedule:
+  is_schedule_active: true
+  
+
