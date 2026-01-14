@@ -1,6 +1,5 @@
 import click
 
-from fastapi import params
 from prefect.deployments import run_deployment
 
 from rca_echo_tools.harvest import echo_raw_data_harvest
