@@ -1,8 +1,8 @@
 import os
-
+from prefect import task
 # TODO unify utils for all RCA repos
 
-
+@task
 def select_logger():
     from prefect import get_run_logger
     try:
