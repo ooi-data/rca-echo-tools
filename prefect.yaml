@@ -27,5 +27,6 @@ deployments:
     job_variables:
       cpu: 2048
       memory: 16384
+      image: jdduprey/rca-echo-tools:latest
   schedule:
   is_schedule_active: true
