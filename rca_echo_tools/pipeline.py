@@ -5,7 +5,7 @@ from prefect.deployments import run_deployment
 
 from rca_echo_tools.harvest import echo_raw_data_harvest
 from rca_echo_tools.utils import select_logger
-from rca_echo_tools.constants import HARVEST_DEPLOYMENT, TEST_BUCKET
+from rca_echo_tools.constants import TEST_BUCKET
 
 # we need to write to zarr at intervals instead of concatenating the whole thing TODO
 # batch processing pattern TODO
