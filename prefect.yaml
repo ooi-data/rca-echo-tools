@@ -42,8 +42,24 @@ deployments:
     job_variables:
       cpu: 16384
       memory: 81920
-      image: jdduprey/rca-echo-tools:latest # overwrites the default image associated with the workpool
+      image: jdduprey/rca-echo-tools:latest
   schedule:
   is_schedule_active: true
+- name: echo_tools_16vcpu_106gb
+  version:
+  tags: []
+  description:
+  entrypoint: ./rca_echo_tools/pipeline.py:echo_raw_data_harvest
+  parameters: {}
+  work_pool:
+    name: hydrophone-pool
+    work_queue_name:
+    job_variables:
+      cpu: 16384
+      memory: 106496
+      image: jdduprey/rca-echo-tools:latest 
+  schedule:
+  is_schedule_active: true
+  
   
 
