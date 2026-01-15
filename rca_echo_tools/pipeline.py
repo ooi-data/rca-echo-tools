@@ -3,7 +3,6 @@ import click
 from prefect.deployments import run_deployment
 
 from rca_echo_tools.harvest import echo_raw_data_harvest
-from rca_echo_tools.utils import select_logger
 from rca_echo_tools.constants import TEST_BUCKET
 
 # we need to write to zarr at intervals instead of concatenating the whole thing TODO
@@ -48,11 +47,10 @@ def run_echo_raw_data_harvest(
     cloud: bool = False,
 ) -> None:
     
-    logger = select_logger()
     run_name = f"{refdes}_{start_date.replace('/', '')}_{end_date.replace('/', '')}"
 
     if cloud:
-        logger.info(f"Launching pipeline in cloud for {run_name}")
+        print(f"Launching pipeline in cloud for {run_name}")
         params = {
         "start_date": start_date,
         "end_date": end_date,
@@ -73,7 +71,7 @@ def run_echo_raw_data_harvest(
         )
     
     else:
-        logger.info(f"Launching pipeline locally for {run_name}")
+        print(f"Launching pipeline locally for {run_name}")
         echo_raw_data_harvest(
             start_date=start_date,
             end_date=end_date,
