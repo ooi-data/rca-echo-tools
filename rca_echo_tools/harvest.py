@@ -32,6 +32,7 @@ def echo_raw_data_harvest(
     run_type: str,
     batch_size_days: int = 2,
 ):
+
     print("print logging test")
     fs_kwargs = get_s3_kwargs()
     fs = fsspec.filesystem("s3", **fs_kwargs)

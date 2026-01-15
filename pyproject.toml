@@ -23,8 +23,7 @@ dependencies = [
   "s3fs>2024.6.0",
   "loguru",
   "zarr>=2,<3",
-  "prefect>3",
-  "prefect-aws",
+  "prefect==2.20.21",
 ]
 
 [project.scripts]
