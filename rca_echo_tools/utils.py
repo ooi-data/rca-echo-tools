@@ -1,4 +1,5 @@
 import os
+from prefect.exceptions import MissingContextError
 # TODO unify utils for all RCA repos
 
 def select_logger():
@@ -6,9 +7,9 @@ def select_logger():
     try:
         logger = get_run_logger()
         print("using prefect logger")
-    except:
+    except MissingContextError as e:
         from loguru import logger
-        print("using loguru logger")
+        print(f"using loguru logger: {e}")
     
     return logger
 

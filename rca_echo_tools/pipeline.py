@@ -85,3 +85,6 @@ def run_echo_raw_data_harvest(
             run_type=run_type,
             batch_size_days=batch_size_days,
         )
+
+if __name__ == "__main__":
+    run_echo_raw_data_harvest()

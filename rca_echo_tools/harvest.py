@@ -6,7 +6,7 @@ import warnings
 import xarray as xr
 import echopype as ep
 
-from prefect import flow
+from prefect import flow, task
 from datetime import datetime, timedelta
 from rca_echo_tools.constants import (
     DATA_BUCKET, 
@@ -31,9 +31,9 @@ def echo_raw_data_harvest(
     data_bucket: str,
     run_type: str,
     batch_size_days: int = 2,
-) -> None:
-
+):
     logger = select_logger()
+    print(type(logger))
     print("print logging test")
     logger.info("logger logging test")
     fs_kwargs = get_s3_kwargs()
@@ -127,7 +127,7 @@ def echo_raw_data_harvest(
     logger.info("Consolidating Zarr metadata")
     zarr.consolidate_metadata(store)
     
-
+@task
 def get_raw_urls(day_str: str, refdes: str):
 
     base_url = "https://rawdata.oceanobservatories.org/files"
@@ -151,7 +151,7 @@ def get_raw_urls(day_str: str, refdes: str):
 
     return data_url_list
 
-
+@task
 def clean_Sv_ds(ds_Sv: xr.Dataset, logger):
 
     var_dropped_list = []
@@ -163,7 +163,6 @@ def clean_Sv_ds(ds_Sv: xr.Dataset, logger):
     logger.info(f"Dropped variables from Sv dataset: {var_dropped_list}")
     
     return ds_Sv
-
 
 if __name__ == "__main__":
     echo_raw_data_harvest()
