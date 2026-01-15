@@ -1,5 +1,4 @@
 import os
-from prefect import task
 # TODO unify utils for all RCA repos
 
 def select_logger():
