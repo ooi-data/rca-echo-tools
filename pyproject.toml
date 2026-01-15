@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rca-echo-tools"
-version = "0.1.0"
+version = "0.2.0"
 description = "echosounder harvest and viz tools"
 authors = [
   { name = "Joe Duprey", email = "jduprey@uw.edu" },
@@ -23,7 +23,7 @@ dependencies = [
   "s3fs>2024.6.0",
   "loguru",
   "zarr>=2,<3",
-  "prefect<3,>=2.5",
+  "prefect>3",
   "prefect-aws",
 ]
 

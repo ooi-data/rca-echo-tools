@@ -14,7 +14,7 @@ from rca_echo_tools.constants import (
     SUFFIX,
     VARIABLES_TO_EXCLUDE
 )
-from rca_echo_tools.utils import select_logger, get_s3_kwargs
+from rca_echo_tools.utils import get_s3_kwargs
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -32,10 +32,7 @@ def echo_raw_data_harvest(
     run_type: str,
     batch_size_days: int = 2,
 ):
-    logger = select_logger()
-    print(type(logger))
     print("print logging test")
-    logger.info("logger logging test")
     fs_kwargs = get_s3_kwargs()
     fs = fsspec.filesystem("s3", **fs_kwargs)
 
@@ -58,7 +55,7 @@ def echo_raw_data_harvest(
             end_dt,
         )
 
-        logger.info(
+        print(
             f"Processing batch {batch_start:%Y-%m-%d} → {batch_end:%Y-%m-%d}"
         )
 
@@ -71,11 +68,11 @@ def echo_raw_data_harvest(
             if daily_urls:
                 batch_urls.extend(daily_urls)
             else:
-                logger.warning(f"No data for {dt:%Y-%m-%d}")
+                print(f"No data for {dt:%Y-%m-%d}")
             dt += timedelta(days=1)
 
         if not batch_urls:
-            logger.warning("No data found for this batch, skipping...")
+            print("No data found for this batch, skipping...")
             batch_start = batch_end + timedelta(days=1)
             continue
 
@@ -83,9 +80,9 @@ def echo_raw_data_harvest(
         Sv_list = []
 
         for url in batch_urls:
-            logger.info(f"Parsing raw data for {url}.")
+            print(f"Parsing raw data for {url}.")
             ed = ep.open_raw(url, sonar_model=sonar_model)
-            logger.info(f"Computing Sv for {url}.")
+            print(f"Computing Sv for {url}.")
             ds_Sv = ep.calibrate.compute_Sv(
                 ed,
                 waveform_mode=waveform_mode,
@@ -93,13 +90,13 @@ def echo_raw_data_harvest(
             )
 
             # TODO variable validation here
-            ds_Sv = clean_Sv_ds(ds_Sv, logger)
+            ds_Sv = clean_Sv_ds(ds_Sv)
 
             Sv_list.append(ds_Sv)
 
             del ed
 
-        logger.info("<<< Concatenating Sv for this batch. >>>")
+        print("<<< Concatenating Sv for this batch. >>>")
         combined_ds = xr.concat(Sv_list, dim="ping_time", join="outer")
 
         del Sv_list  # free up memory
@@ -108,7 +105,7 @@ def echo_raw_data_harvest(
         write_mode = "w" if not store_exists else "a"
 
         # TODO check what auto chunking is doing?
-        logger.info("------ Writing batch to Zarr store. ------")
+        print("------ Writing batch to Zarr store. ------")
         combined_ds.to_zarr(
             store_path,
             mode=write_mode,
@@ -124,7 +121,7 @@ def echo_raw_data_harvest(
         batch_start = batch_end + timedelta(days=1)
 
     # 5. Consolidate metadata ONCE
-    logger.info("Consolidating Zarr metadata")
+    print("Consolidating Zarr metadata")
     zarr.consolidate_metadata(store)
     
 @task
@@ -152,7 +149,7 @@ def get_raw_urls(day_str: str, refdes: str):
     return data_url_list
 
 @task
-def clean_Sv_ds(ds_Sv: xr.Dataset, logger):
+def clean_Sv_ds(ds_Sv: xr.Dataset):
 
     var_dropped_list = []
     for var in ds_Sv.data_vars:
@@ -160,7 +157,7 @@ def clean_Sv_ds(ds_Sv: xr.Dataset, logger):
             var_dropped_list.append(var)
             ds_Sv = ds_Sv.drop_vars(var)
     
-    logger.info(f"Dropped variables from Sv dataset: {var_dropped_list}")
+    print(f"Dropped variables from Sv dataset: {var_dropped_list}")
     
     return ds_Sv
 
