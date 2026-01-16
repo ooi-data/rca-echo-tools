@@ -1,7 +1,6 @@
 """module for harvesting .raw echosounder data and writing to chunked zarr store"""
 import fsspec
 import zarr 
-import warnings
 
 import xarray as xr
 import echopype as ep
@@ -9,28 +8,25 @@ import echopype as ep
 from prefect import flow, task
 from datetime import datetime, timedelta
 from rca_echo_tools.constants import (
-    DATA_BUCKET, 
-    OFFSHORE_CHUNKING, 
     SUFFIX,
     VARIABLES_TO_EXCLUDE
 )
 from rca_echo_tools.utils import get_s3_kwargs
 
-warnings.filterwarnings("ignore", category=FutureWarning)
 
 # we need to write to zarr at intervals instead of concatenating the whole thing TODO
 # batch processing pattern TODO
-@flow(log_prints=True)
+@flow
 def echo_raw_data_harvest(
-    start_date: str,
-    end_date: str,
-    refdes: str,
-    waveform_mode: str,
-    encode_mode: str,
-    sonar_model: str,
-    data_bucket: str,
-    run_type: str,
-    batch_size_days: int = 2,
+    start_date,
+    end_date,
+    refdes,
+    waveform_mode,
+    encode_mode,
+    sonar_model,
+    data_bucket,
+    run_type,
+    batch_size_days=2
 ):
 
     print("print logging test")
@@ -162,5 +158,3 @@ def clean_Sv_ds(ds_Sv: xr.Dataset):
     
     return ds_Sv
 
-if __name__ == "__main__":
-    echo_raw_data_harvest()

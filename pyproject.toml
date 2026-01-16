@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rca-echo-tools"
-version = "0.2.0"
+version = "0.3.0"
 description = "echosounder harvest and viz tools"
 authors = [
   { name = "Joe Duprey", email = "jduprey@uw.edu" },
@@ -16,14 +16,15 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-  "echopype>=0.10.0",
+  "echopype>=0.11.0",
   "xarray>=2024.11.0",
   "fsspec>2024.10.0",
   "requests",
   "s3fs>2024.6.0",
   "loguru",
-  "zarr>=2,<3",
-  "prefect==2.20.21",
+  "zarr",
+  "prefect>=3.0.0",
+  "click==8.1.8",
 ]
 
 [project.scripts]
