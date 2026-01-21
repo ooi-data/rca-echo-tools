@@ -5,6 +5,7 @@ from importlib.metadata import distributions
 
 from rca_echo_tools.harvest import echo_raw_data_harvest
 from rca_echo_tools.constants import TEST_BUCKET
+from rca_echo_tools.utils import select_logger
 
 # we need to write to zarr at intervals instead of concatenating the whole thing TODO
 # batch processing pattern TODO
@@ -34,7 +35,7 @@ from rca_echo_tools.constants import TEST_BUCKET
         "Append will append to existing zarrs store along `ping_time` dimension.",
     default="append"
 )
-@click.option("--cloud", required=False, is_flag=True, default=False, help="Flag to indicate if harvest should run on RCA cloud.")
+@click.option("--cloud", type=bool, default=False, show_default=True, help="Flag to indicate if harvest should run on RCA cloud.")
 def run_echo_raw_data_harvest(
     start_date: str,
     end_date: str,
@@ -48,10 +49,11 @@ def run_echo_raw_data_harvest(
     cloud: bool = False,
 ) -> None:
     
+    logger = select_logger()
     run_name = f"{refdes}_{start_date.replace('/', '')}_{end_date.replace('/', '')}"
 
     installed_packages = {dist.metadata["Name"]: dist.version for dist in distributions()}
-    print(f"Installed packages: {installed_packages}")
+    logger.info(f"Installed packages: {installed_packages}")
     if cloud:
         print(f"Launching pipeline in cloud for {run_name}")
         params = {
@@ -74,7 +76,7 @@ def run_echo_raw_data_harvest(
         )
     
     else:
-        print(f"Launching pipeline locally for {run_name}")
+        logger.info(f"Launching pipeline locally for {run_name}")
         echo_raw_data_harvest(
             start_date=start_date,
             end_date=end_date,

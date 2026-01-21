@@ -11,12 +11,12 @@ from rca_echo_tools.constants import (
     SUFFIX,
     VARIABLES_TO_EXCLUDE
 )
-from rca_echo_tools.utils import get_s3_kwargs
+from rca_echo_tools.utils import get_s3_kwargs, select_logger
 
 
 # we need to write to zarr at intervals instead of concatenating the whole thing TODO
 # batch processing pattern TODO
-@flow
+@flow(log_prints=True)
 def echo_raw_data_harvest(
     start_date,
     end_date,
@@ -29,7 +29,9 @@ def echo_raw_data_harvest(
     batch_size_days=2
 ):
 
+    logger = select_logger()
     print("print logging test")
+    logger.info("logger logger test")
     fs_kwargs = get_s3_kwargs()
     fs = fsspec.filesystem("s3", **fs_kwargs)
 
