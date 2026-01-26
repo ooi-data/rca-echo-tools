@@ -18,5 +18,8 @@ def get_s3_kwargs():
     aws_key = os.environ.get("AWS_KEY")
     aws_secret = os.environ.get("AWS_SECRET")
 
+    if aws_key is None or aws_secret is None:
+        raise EnvironmentError("AWS_KEY and AWS_SECRET must be set in environment variables.")
+
     s3_kwargs = {"key": aws_key, "secret": aws_secret}
     return s3_kwargs

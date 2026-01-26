@@ -1,7 +1,8 @@
 """module for harvesting .raw echosounder data and writing to chunked zarr store"""
 import fsspec
 import zarr 
-
+import logging 
+import sys
 import xarray as xr
 import echopype as ep
 
@@ -28,10 +29,11 @@ def echo_raw_data_harvest(
     run_type,
     batch_size_days=2
 ):
-
+    restore_logging_for_prefect()
     logger = select_logger()
     print("print logging test")
     logger.info("logger logger test")
+
     fs_kwargs = get_s3_kwargs()
     fs = fsspec.filesystem("s3", **fs_kwargs)
 
@@ -159,4 +161,22 @@ def clean_Sv_ds(ds_Sv: xr.Dataset):
     print(f"Dropped variables from Sv dataset: {var_dropped_list}")
     
     return ds_Sv
+
+@task
+def restore_logging_for_prefect():
+    root = logging.getLogger()
+
+    # Remove all handlers echopype installed
+    for h in list(root.handlers):
+        root.removeHandler(h)
+
+    logging.disable(logging.NOTSET)  # undo echopype's global disable
+    root.setLevel(logging.INFO)
+
+    handler = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter(
+        "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+    )
+    handler.setFormatter(formatter)
+    root.addHandler(handler)
 
