@@ -1,4 +1,5 @@
 """module for harvesting .raw echosounder data and writing to chunked zarr store"""
+import json
 import fsspec
 import zarr 
 import logging 
@@ -10,7 +11,8 @@ from prefect import flow, task
 from datetime import datetime, timedelta
 from rca_echo_tools.constants import (
     SUFFIX,
-    VARIABLES_TO_EXCLUDE
+    VARIABLES_TO_EXCLUDE,
+    METADATA_JSON_BUCKET,
 )
 from rca_echo_tools.utils import get_s3_kwargs, select_logger
 
@@ -31,13 +33,17 @@ def echo_raw_data_harvest(
 ):
     restore_logging_for_prefect()
     logger = select_logger()
-    print("print logging test")
-    logger.info("logger logger test")
 
     fs_kwargs = get_s3_kwargs()
     fs = fsspec.filesystem("s3", **fs_kwargs)
 
     store_path = f"{data_bucket}/{refdes}-{SUFFIX}/"
+    metadata_json_path = f"{METADATA_JSON_BUCKET}/{refdes}-{SUFFIX}/"
+
+    if run_type not in ["refresh"]:
+        with fs.open(metadata_json_path, "r") as f:
+            metadata_dict = json.load(f)
+
     store = fs.get_mapper(store_path)
     store_exists = fs.exists(store_path)
     if run_type == "refresh" and store_exists:
@@ -56,7 +62,7 @@ def echo_raw_data_harvest(
             end_dt,
         )
 
-        print(
+        logger.info(
             f"Processing batch {batch_start:%Y-%m-%d} → {batch_end:%Y-%m-%d}"
         )
 
@@ -69,7 +75,7 @@ def echo_raw_data_harvest(
             if daily_urls:
                 batch_urls.extend(daily_urls)
             else:
-                print(f"No data for {dt:%Y-%m-%d}")
+                logger.info(f"No data for {dt:%Y-%m-%d}")
             dt += timedelta(days=1)
 
         if not batch_urls:
@@ -120,10 +126,42 @@ def echo_raw_data_harvest(
 
         # 4. Move to next batch
         batch_start = batch_end + timedelta(days=1)
+    
+    update_metadata_json(
+        start_dt=start_dt, 
+        end_dt=end_dt, 
+        run_type=run_type, 
+        fs=fs, 
+        metadata_path=metadata_json_path
+    )
 
     # 5. Consolidate metadata ONCE
-    print("Consolidating Zarr metadata")
-    zarr.consolidate_metadata(store)
+    #print("Consolidating Zarr metadata") #TODO zarr 3 doesn't use consolidate metadata
+    #zarr.consolidate_metadata(store) # TODO
+
+
+@task
+def update_metadata_json(
+    start_dt: datetime, 
+    end_dt: datetime, 
+    run_type: str, 
+    fs: fsspec.filesystem, 
+    metadata_path: str
+):
+    if run_type == "refresh":
+        metadata_dict = {
+            "start_date": start_dt.strftime("%Y/%m/%d"),
+            "end_date": end_dt.strftime("%Y/%m/%d"),
+        }
+
+        with fs.open(metadata_path, "w") as f:
+            json.dump(metadata_dict, f)
+    else:
+        pass
+        # TODO append to existing metadata json
+
+
+    
     
 @task
 def get_raw_urls(day_str: str, refdes: str):
