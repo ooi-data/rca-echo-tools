@@ -37,7 +37,7 @@ def echo_raw_data_harvest(
     fs = fsspec.filesystem("s3", **fs_kwargs)
 
     store_path = f"{data_bucket}/{refdes}-{SUFFIX}/"
-    metadata_json_path = f"{METADATA_JSON_BUCKET}/{refdes}-{SUFFIX}/"
+    metadata_json_path = f"{METADATA_JSON_BUCKET}/harvest-status/{refdes}-{SUFFIX}/"
 
     if run_type not in ["refresh"]:
         with fs.open(metadata_json_path, "r") as f:
