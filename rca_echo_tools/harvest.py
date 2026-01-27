@@ -164,6 +164,8 @@ def clean_Sv_ds(ds_Sv: xr.Dataset):
 
 @task
 def restore_logging_for_prefect():
+    """echopype alters loggin configs in a way that breaks prefect logging. 
+    This function should restore it in most cases."""
     root = logging.getLogger()
 
     # Remove all handlers echopype installed
