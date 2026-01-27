@@ -14,7 +14,7 @@ from rca_echo_tools.constants import (
     VARIABLES_TO_EXCLUDE,
     METADATA_JSON_BUCKET,
 )
-from rca_echo_tools.utils import get_s3_kwargs, select_logger
+from rca_echo_tools.utils import get_s3_kwargs 
 
 
 # we need to write to zarr at intervals instead of concatenating the whole thing TODO
@@ -32,7 +32,6 @@ def echo_raw_data_harvest(
     batch_size_days=2
 ):
     restore_logging_for_prefect()
-    logger = select_logger()
 
     fs_kwargs = get_s3_kwargs()
     fs = fsspec.filesystem("s3", **fs_kwargs)
@@ -62,7 +61,7 @@ def echo_raw_data_harvest(
             end_dt,
         )
 
-        logger.info(
+        print(
             f"Processing batch {batch_start:%Y-%m-%d} → {batch_end:%Y-%m-%d}"
         )
 
@@ -75,7 +74,7 @@ def echo_raw_data_harvest(
             if daily_urls:
                 batch_urls.extend(daily_urls)
             else:
-                logger.info(f"No data for {dt:%Y-%m-%d}")
+                print(f"No data for {dt:%Y-%m-%d}")
             dt += timedelta(days=1)
 
         if not batch_urls:
@@ -127,6 +126,7 @@ def echo_raw_data_harvest(
         # 4. Move to next batch
         batch_start = batch_end + timedelta(days=1)
     
+    print("Updating metadata JSON.")
     update_metadata_json(
         start_dt=start_dt, 
         end_dt=end_dt, 
@@ -148,7 +148,7 @@ def update_metadata_json(
     fs: fsspec.filesystem, 
     metadata_path: str
 ):
-    if run_type == "refresh":
+    if run_type in ["refresh"]:
         metadata_dict = {
             "start_date": start_dt.strftime("%Y/%m/%d"),
             "end_date": end_dt.strftime("%Y/%m/%d"),
