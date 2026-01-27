@@ -1,7 +1,6 @@
 """module for harvesting .raw echosounder data and writing to chunked zarr store"""
 import json
 import fsspec
-import zarr 
 import logging 
 import sys
 import xarray as xr
@@ -43,7 +42,7 @@ def echo_raw_data_harvest(
         with fs.open(metadata_json_path, "r") as f:
             metadata_dict = json.load(f)
 
-    store = fs.get_mapper(store_path)
+    # store = fs.get_mapper(store_path) #TODO uneeded without metadat?
     store_exists = fs.exists(store_path)
     if run_type == "refresh" and store_exists:
         raise FileExistsError("`--refresh` specified, but zarr store already exists. Please either " \
@@ -135,7 +134,7 @@ def echo_raw_data_harvest(
         metadata_path=metadata_json_path
     )
 
-    # 5. Consolidate metadata ONCE
+    # 5. Consolidate metadata ONCE 
     #print("Consolidating Zarr metadata") #TODO zarr 3 doesn't use consolidate metadata
     #zarr.consolidate_metadata(store) # TODO
 
