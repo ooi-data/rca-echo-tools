@@ -4,7 +4,7 @@ from prefect.deployments import run_deployment
 from importlib.metadata import distributions
 
 from rca_echo_tools.harvest import echo_raw_data_harvest
-from rca_echo_tools.constants import TEST_BUCKET
+from rca_echo_tools.constants import DATA_BUCKET
 from rca_echo_tools.utils import select_logger
 
 # we need to write to zarr at intervals instead of concatenating the whole thing TODO
@@ -26,7 +26,7 @@ from rca_echo_tools.utils import select_logger
     help="Encode mode: power or complex"
 )
 @click.option("--sonar-model", required=True, type=str, help="Sonar model: EK80 or EK60")
-@click.option("--data-bucket", required=False, type=str, default=TEST_BUCKET, help="S3 bucket to write zarr store to")
+@click.option("--data-bucket", required=False, type=str, default=DATA_BUCKET, help="S3 bucket to write zarr store to")
 @click.option(
     "--run-type",
     required=False,
