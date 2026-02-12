@@ -50,7 +50,7 @@ def echo_raw_data_harvest(
             if day in metadata_dict.keys():
                 overlap_days.append(day)
         if len(overlap_days) > 0:
-            raise ValueError(f"Date {day} already exists in metadata JSON. Please either "
+            raise ValueError(f"Date {overlap_days} already exists in metadata JSON. Please either "
                                 "remove this date from the JSON if you wish to reprocess it, or "
                                 "specify `--refresh` if you wish to overwrite existing data for "
                                 "the entire date range.")
