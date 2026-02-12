@@ -1,0 +1,29 @@
+
+name: rca-echo-tools
+prefect-version: 3.6.11
+
+# build section allows you to manage and build docker images
+build:
+
+# push section allows you to manage if and how this project is uploaded to remote locations
+push:
+
+# pull section allows you to provide instructions for cloning this project in remote locations
+pull:
+- prefect.deployments.steps.git_clone:
+    repository: https://github.com/ooi-data/rca-echo-tools.git
+    branch: main
+# the deployments section allows you to provide configuration for deploying flows
+deployments:
+- name: echo_raw_data_harvest_8vcpu_60gb
+  version:
+  tags: []
+  description:
+  entrypoint: rca_echo_tools/pipeline.py:run_echo_raw_data_harvest
+  parameters: {}
+  work_pool:
+    name: #TODO
+    work_queue_name:
+    job_variables: {}
+  schedule:
+  is_schedule_active:
