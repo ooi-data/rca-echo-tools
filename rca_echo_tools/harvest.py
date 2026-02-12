@@ -20,15 +20,15 @@ from rca_echo_tools.utils import get_s3_kwargs
 # batch processing pattern TODO
 @flow(log_prints=True)
 def echo_raw_data_harvest(
-    start_date,
-    end_date,
-    refdes,
-    waveform_mode,
-    encode_mode,
-    sonar_model,
-    data_bucket,
-    run_type,
-    batch_size_days=2
+    start_date: str,
+    end_date: str,
+    refdes: str,
+    waveform_mode: str,
+    encode_mode: str,
+    sonar_model: str,
+    data_bucket: str,
+    run_type: str,
+    batch_size_days: int = 2
 ):
     restore_logging_for_prefect()
 
@@ -136,14 +136,14 @@ def echo_raw_data_harvest(
     
     print("Updating metadata JSON.")
     if run_type in ["prepend"]:
-        start_dt = datetime.strptime(start_date, "%Y/%m/%d")
-        end_dt = datetime.strptime(metadata_dict["end_date"], "%Y/%m/%d")
+        start_dt = start_date
+        end_dt = metadata_dict["end_date"]
     elif run_type in ["append"]:
-        start_dt = datetime.strptime(metadata_dict["start_date"], "%Y/%m/%d")
-        end_dt = datetime.strptime(end_date, "%Y/%m/%d")
+        start_dt = metadata_dict["start_date"]
+        end_dt = end_date
     elif run_type in ["refresh"]:
-        start_dt = datetime.strptime(start_date, "%Y/%m/%d")
-        end_dt = datetime.strptime(end_date, "%Y/%m/%d")
+        start_dt = start_date
+        end_dt = end_date
     update_metadata_json(
         start_dt=start_dt, 
         end_dt=end_dt, 
@@ -158,8 +158,8 @@ def echo_raw_data_harvest(
 
 @task
 def update_metadata_json(
-    start_dt: datetime, 
-    end_dt: datetime, 
+    start_dt: str, 
+    end_dt: str, 
     fs: fsspec.filesystem, 
     metadata_path: str
 ):
