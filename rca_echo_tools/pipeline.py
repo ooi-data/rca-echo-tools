@@ -30,7 +30,7 @@ from rca_echo_tools.utils import select_logger
 @click.option(
     "--run-type",
     required=False,
-    type=click.Choice(["prepend", "append", "refresh"], case_sensitive=False),
+    type=click.Choice(["append", "refresh"], case_sensitive=False),
     help="Type of pipeline run. Refresh will overwrite existing zarr store with specified date range."
         "Append will append to existing zarrs store along `ping_time` dimension.",
     default="append"
@@ -69,7 +69,7 @@ def run_echo_raw_data_harvest(
         }   
 
         run_deployment(
-            name=f"echo-raw-data-harvest/echo_tools_16vcpu_106gb",
+            name=f"echo-raw-data-harvest/echo_tools_16vcpu_106gb", # TODO
             parameters=params,
             flow_run_name=run_name,
             timeout=12,

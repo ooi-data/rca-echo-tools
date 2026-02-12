@@ -37,25 +37,29 @@ def echo_raw_data_harvest(
 
     store_path = f"{data_bucket}/{refdes}-{SUFFIX}/"
     metadata_json_path = f"{METADATA_JSON_BUCKET}/harvest-status/{refdes}-{SUFFIX}/"
+    
+    days_strings = get_day_strings(start_date, end_date)
 
     if run_type not in ["refresh"]:
         with fs.open(metadata_json_path, "r") as f:
             metadata_dict = json.load(f)
 
-    if run_type in ["prepend"]:
-        if datetime.strptime(end_date, "%Y/%m/%d") >= datetime.strptime(metadata_dict["start_date"], "%Y/%m/%d"):
-            raise ValueError("`--prepend` specified, but end_date is after or equal to existing start_date in metadata. " \
-            "Please adjust date range or use `--append` or `--refresh` instead.")
     if run_type in ["append"]:
-        if datetime.strptime(start_date, "%Y/%m/%d") <= datetime.strptime(metadata_dict["end_date"], "%Y/%m/%d"):
-            raise ValueError("`--append` specified, but start_date is before or equal to existing end_date in metadata. " \
-            "Please adjust date range or use `--prepend` or `--refresh` instead.")
+        overlap_days = []
+        for day in days_strings:
+            if day in metadata_dict.keys():
+                overlap_days.append(day)
+        if len(overlap_days) > 0:
+            raise ValueError(f"Date {day} already exists in metadata JSON. Please either "
+                                "remove this date from the JSON if you wish to reprocess it, or "
+                                "specify `--refresh` if you wish to overwrite existing data for "
+                                "the entire date range.")
 
     # store = fs.get_mapper(store_path) #TODO uneeded without metadat?
     store_exists = fs.exists(store_path)
     if run_type == "refresh" and store_exists:
         raise FileExistsError("`--refresh` specified, but zarr store already exists. Please either " \
-        "delete existing store and run refesh again, or specify `--prepend/--append` if you just wish to modify " \
+        "delete existing store and run refesh again, or specify `--append` if you just wish to modify " \
         "existing store.")
 
     start_dt = datetime.strptime(start_date, "%Y/%m/%d")
@@ -135,18 +139,11 @@ def echo_raw_data_harvest(
         batch_start = batch_end + timedelta(days=1)
     
     print("Updating metadata JSON.")
-    if run_type in ["prepend"]:
-        start_dt = start_date
-        end_dt = metadata_dict["end_date"]
-    elif run_type in ["append"]:
-        start_dt = metadata_dict["start_date"]
-        end_dt = end_date
-    elif run_type in ["refresh"]:
-        start_dt = start_date
-        end_dt = end_date
     update_metadata_json(
-        start_dt=start_dt, 
-        end_dt=end_dt, 
+        run_type=run_type,
+        metadata_day_keys=days_strings, 
+        waveform_mode=waveform_mode,
+        encode_mode=encode_mode,
         fs=fs, 
         metadata_path=metadata_json_path
     )
@@ -158,19 +155,38 @@ def echo_raw_data_harvest(
 
 @task
 def update_metadata_json(
-    start_dt: str, 
-    end_dt: str, 
+    run_type: str,
+    metadata_day_keys: list[str], 
+    waveform_mode: str,
+    encode_mode: str,
     fs: fsspec.filesystem, 
     metadata_path: str
 ):
-    metadata_dict = {
-        "start_date": start_dt,
-        "end_date": end_dt,
+    # Build new entries for this run
+    new_entries = {
+        day: {
+            "waveform_mode": waveform_mode,
+            "encode_mode": encode_mode,
+        }
+        for day in metadata_day_keys
     }
 
-    with fs.open(metadata_path, "w") as f:
-        json.dump(metadata_dict, f)
+    if run_type == "refresh":
+        final_metadata = new_entries
 
+    elif run_type == "append":
+        # Load existing metadata
+        if fs.exists(metadata_path):
+            with fs.open(metadata_path, "r") as f:
+                existing_metadata = json.load(f)
+        else:
+            existing_metadata = {}
+
+        final_metadata = {**existing_metadata, **new_entries}
+
+    # Write final metadata in one shot
+    with fs.open(metadata_path, "w") as f:
+        json.dump(final_metadata, f, indent=2)
     
     
 @task
@@ -210,7 +226,7 @@ def clean_Sv_ds(ds_Sv: xr.Dataset):
     
     return ds_Sv
 
-@task
+
 def restore_logging_for_prefect():
     """echopype alters loggin configs in a way that breaks prefect logging. 
     This function should restore it in most cases."""
@@ -230,3 +246,15 @@ def restore_logging_for_prefect():
     handler.setFormatter(formatter)
     root.addHandler(handler)
 
+
+def get_day_strings(start_date: str, end_date: str) -> list[str]:
+    start_dt = datetime.strptime(start_date, "%Y/%m/%d")
+    end_dt = datetime.strptime(end_date, "%Y/%m/%d")
+
+    days = []
+    current = start_dt
+    while current <= end_dt:
+        days.append(current.strftime("%Y/%m/%d"))
+        current += timedelta(days=1)
+
+    return days
