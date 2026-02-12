@@ -55,8 +55,8 @@ def echo_raw_data_harvest(
     store_exists = fs.exists(store_path)
     if run_type == "refresh" and store_exists:
         raise FileExistsError("`--refresh` specified, but zarr store already exists. Please either " \
-        "delete existing store and run refesh again, or specify `--append` if you just wish to append " \
-        "to existing store.")
+        "delete existing store and run refesh again, or specify `--prepend/--append` if you just wish to modify " \
+        "existing store.")
 
     start_dt = datetime.strptime(start_date, "%Y/%m/%d")
     end_dt = datetime.strptime(end_date, "%Y/%m/%d")
