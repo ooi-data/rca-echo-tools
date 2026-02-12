@@ -42,6 +42,15 @@ def echo_raw_data_harvest(
         with fs.open(metadata_json_path, "r") as f:
             metadata_dict = json.load(f)
 
+    if run_type in ["prepend"]:
+        if datetime.strptime(end_date, "%Y/%m/%d") >= datetime.strptime(metadata_dict["start_date"], "%Y/%m/%d"):
+            raise ValueError("`--prepend` specified, but end_date is after or equal to existing start_date in metadata. " \
+            "Please adjust date range or use `--append` or `--refresh` instead.")
+    if run_type in ["append"]:
+        if datetime.strptime(start_date, "%Y/%m/%d") <= datetime.strptime(metadata_dict["end_date"], "%Y/%m/%d"):
+            raise ValueError("`--append` specified, but start_date is before or equal to existing end_date in metadata. " \
+            "Please adjust date range or use `--prepend` or `--refresh` instead.")
+
     # store = fs.get_mapper(store_path) #TODO uneeded without metadat?
     store_exists = fs.exists(store_path)
     if run_type == "refresh" and store_exists:
@@ -126,10 +135,18 @@ def echo_raw_data_harvest(
         batch_start = batch_end + timedelta(days=1)
     
     print("Updating metadata JSON.")
+    if run_type in ["prepend"]:
+        start_dt = datetime.strptime(start_date, "%Y/%m/%d")
+        end_dt = datetime.strptime(metadata_dict["end_date"], "%Y/%m/%d")
+    elif run_type in ["append"]:
+        start_dt = datetime.strptime(metadata_dict["start_date"], "%Y/%m/%d")
+        end_dt = datetime.strptime(end_date, "%Y/%m/%d")
+    elif run_type in ["refresh"]:
+        start_dt = datetime.strptime(start_date, "%Y/%m/%d")
+        end_dt = datetime.strptime(end_date, "%Y/%m/%d")
     update_metadata_json(
         start_dt=start_dt, 
         end_dt=end_dt, 
-        run_type=run_type, 
         fs=fs, 
         metadata_path=metadata_json_path
     )
@@ -143,22 +160,16 @@ def echo_raw_data_harvest(
 def update_metadata_json(
     start_dt: datetime, 
     end_dt: datetime, 
-    run_type: str, 
     fs: fsspec.filesystem, 
     metadata_path: str
 ):
-    if run_type in ["refresh"]:
-        metadata_dict = {
-            "start_date": start_dt.strftime("%Y/%m/%d"),
-            "end_date": end_dt.strftime("%Y/%m/%d"),
-        }
+    metadata_dict = {
+        "start_date": start_dt,
+        "end_date": end_dt,
+    }
 
-        with fs.open(metadata_path, "w") as f:
-            json.dump(metadata_dict, f)
-    else:
-        pass
-        # TODO append to existing metadata json
-
+    with fs.open(metadata_path, "w") as f:
+        json.dump(metadata_dict, f)
 
     
     
