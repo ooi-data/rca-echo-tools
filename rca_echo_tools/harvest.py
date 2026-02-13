@@ -144,6 +144,7 @@ def echo_raw_data_harvest(
         metadata_day_keys=days_strings, 
         waveform_mode=waveform_mode,
         encode_mode=encode_mode,
+        sonar_model=sonar_model,
         fs=fs, 
         metadata_path=metadata_json_path
     )
