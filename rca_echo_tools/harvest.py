@@ -159,6 +159,7 @@ def update_metadata_json(
     metadata_day_keys: list[str], 
     waveform_mode: str,
     encode_mode: str,
+    sonar_model: str,
     fs: fsspec.filesystem, 
     metadata_path: str
 ):
@@ -167,6 +168,7 @@ def update_metadata_json(
         day: {
             "waveform_mode": waveform_mode,
             "encode_mode": encode_mode,
+            "sonar_model": sonar_model,
         }
         for day in metadata_day_keys
     }
