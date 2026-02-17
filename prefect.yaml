@@ -22,7 +22,7 @@ deployments:
   entrypoint: rca_echo_tools/harvest.py:echo_raw_data_harvest
   parameters: {}
   work_pool:
-    name: hydrophone-push-pool
+    name: hydrophone-pool
     work_queue_name:
     job_variables: {}
   schedule:
