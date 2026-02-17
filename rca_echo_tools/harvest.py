@@ -29,7 +29,7 @@ def echo_raw_data_harvest(
     sonar_model: str,
     data_bucket: str,
     run_type: str,
-    batch_size_days: int = 1
+    batch_size_days: int = 2
 ):
     restore_logging_for_prefect()
 
