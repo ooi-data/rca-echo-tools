@@ -4,7 +4,7 @@ from prefect.deployments import run_deployment
 from importlib.metadata import distributions
 
 from rca_echo_tools.harvest import echo_raw_data_harvest
-from rca_echo_tools.constants import DATA_BUCKET
+from rca_echo_tools.constants import DATA_BUCKET, DEFAULT_DEPLOYMENT
 from rca_echo_tools.utils import select_logger
 
 # we need to write to zarr at intervals instead of concatenating the whole thing TODO
@@ -69,7 +69,7 @@ def run_echo_raw_data_harvest(
         }   
 
         run_deployment(
-            name=f"echo-raw-data-harvest/echo_tools_16vcpu_106gb", # TODO
+            name=f"echo-raw-data-harvest/{DEFAULT_DEPLOYMENT}",
             parameters=params,
             flow_run_name=run_name,
             timeout=12,

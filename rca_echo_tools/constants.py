@@ -55,6 +55,6 @@ VARIABLES_TO_INCLUDE = [
     "water_level",
 ]
 
-
+DEFAULT_DEPLOYMENT = "echo_tools_4vcpu_30gb"
 
 
