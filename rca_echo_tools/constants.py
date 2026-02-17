@@ -55,6 +55,6 @@ VARIABLES_TO_INCLUDE = [
     "water_level",
 ]
 
-DEFAULT_DEPLOYMENT = "echo_raw_data_harvest_4vcpu_30gb"
+DEFAULT_DEPLOYMENT = "echo_raw_data_harvest_8vcpu_60gb"
 
 
