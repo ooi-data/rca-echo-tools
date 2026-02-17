@@ -24,6 +24,7 @@ deployments:
   work_pool:
     name: hydrophone-pool
     work_queue_name:
-    job_variables: {}
+    job_variables:
+      image: "jdduprey/rca-echo-tools:latest"
   schedule:
   is_schedule_active:
