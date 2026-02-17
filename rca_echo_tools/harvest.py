@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from rca_echo_tools.constants import (
     SUFFIX,
     VARIABLES_TO_EXCLUDE,
+    VARIABLES_TO_INCLUDE,
     METADATA_JSON_BUCKET,
 )
 from rca_echo_tools.utils import get_s3_kwargs 
@@ -108,7 +109,7 @@ def echo_raw_data_harvest(
             )
 
             # TODO variable validation here
-            ds_Sv = clean_Sv_ds(ds_Sv)
+            ds_Sv = clean_and_validate_Sv_ds(ds_Sv)
 
             Sv_list.append(ds_Sv)
 
@@ -216,16 +217,20 @@ def get_raw_urls(day_str: str, refdes: str):
 
     return data_url_list
 
-@task # TODO missing variable fill here as well
-def clean_Sv_ds(ds_Sv: xr.Dataset):
+@task # missing variable padding could occur here as well if needed
+def clean_and_validate_Sv_ds(ds_Sv: xr.Dataset):
 
     var_dropped_list = []
     for var in ds_Sv.data_vars:
         if var in VARIABLES_TO_EXCLUDE:
             var_dropped_list.append(var)
-            ds_Sv = ds_Sv.drop_vars(var)
+    ds_Sv = ds_Sv.drop_vars(var_dropped_list)
     
     print(f"Dropped variables from Sv dataset: {var_dropped_list}")
+
+    for var in VARIABLES_TO_INCLUDE:
+        if var not in ds_Sv.data_vars:
+            raise ValueError(f"Expected variable {var} not found in Sv dataset.")
     
     return ds_Sv
 

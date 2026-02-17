@@ -23,14 +23,38 @@ OFFSHORE_CHUNKING = {
     "filenames": -1,
 }
 
-# exclude simrad specific variables in echopype output
+# exclude simrad specific variables in echopype output and reduntant configs
+# TODO revisit if any of these are needed down the line, we might need to do some data padding in the pipeline
 VARIABLES_TO_EXCLUDE = [
-    "angle_offset_alongship",
-    "angle_offset_athwartship",
-    "angle_sensitivity_alongship",
-    "angle_sensitivity_athwartship",
-    "beamwidth_alongship",
-    "beamwidth_athwartship",
+    "angle_offset_alongship", #simrad specific variable?
+    "angle_offset_athwartship", #simrad specific variable?
+    "angle_sensitivity_alongship", #simrad specific variable?
+    "angle_sensitivity_athwartship", #simrad specific variable?
+    "beamwidth_alongship", #simrad specific variable?
+    "beamwidth_athwartship", #simrad specific variable?
+    "pressure", # from APL config not onboard CTD
+    "temperature", # from APL config not onboard CTD
+    "salinity", # from APL config not onboard CTD
+    "pH", # from APL config not onboard CTD
+    "sa_correction", # from APL config not onboard CTD
 ]
+
+VARIABLES_TO_INCLUDE = [
+    "equivalent_beam_angle",
+    "echo_range",
+    "Sv",
+    "gain_correction",
+    "impedance_transceiver",
+    "formula_absorption",
+    "receiver_sampling_frequency",
+    "impedance_transducer",
+    "frequency_nominal",
+    "sound_absorption",
+    "sound_speed",
+    "source_filenames",
+    "water_level",
+]
+
+
 
 
