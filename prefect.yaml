@@ -15,14 +15,14 @@ pull:
     branch: main
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
-- name: echo_raw_data_harvest_8vcpu_60gb
+- name: echo_raw_data_harvest_4vcpu_30gb
   version:
   tags: []
   description:
   entrypoint: rca_echo_tools/pipeline.py:run_echo_raw_data_harvest
   parameters: {}
   work_pool:
-    name: #TODO
+    name: hydrophone-push-pool
     work_queue_name:
     job_variables: {}
   schedule:
