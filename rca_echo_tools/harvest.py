@@ -56,7 +56,6 @@ def echo_raw_data_harvest(
                                 "specify `--refresh` if you wish to overwrite existing data for "
                                 "the entire date range.")
 
-    # store = fs.get_mapper(store_path) #TODO uneeded without metadat?
     store_exists = fs.exists(store_path)
     if run_type == "refresh" and store_exists:
         raise FileExistsError("`--refresh` specified, but zarr store already exists. Please either " \
@@ -102,7 +101,7 @@ def echo_raw_data_harvest(
             print(f"Parsing raw data for {url}.")
             ed = ep.open_raw(url, sonar_model=sonar_model)
             print(f"Computing Sv for {url}.")
-            ds_Sv = ep.calibrate.compute_Sv(
+            ds_Sv = ep.calibrate.compute_Sv( #TODO echopype zarr suggestion?
                 ed,
                 waveform_mode=waveform_mode,
                 encode_mode=encode_mode,
