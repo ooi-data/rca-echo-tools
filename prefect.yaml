@@ -15,7 +15,7 @@ pull:
     branch: main
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
-- name: echo_raw_data_harvest_8vcpu_60gb
+- name: echo_raw_data_harvest_4vcpu_30gb
   version:
   tags: []
   description:
@@ -26,7 +26,7 @@ deployments:
     work_queue_name:
     job_variables:
       image: "jdduprey/rca-echo-tools:latest"
-      cpu: 8192
-      memory: 61440
+      # cpu: 8192
+      # memory: 61440
   schedule:
   is_schedule_active:
