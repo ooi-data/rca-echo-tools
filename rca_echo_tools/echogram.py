@@ -1,6 +1,8 @@
 import echopype as ep
 
 from datetime import datetime, timedelta
+from pathlib import Path
+
 from rca_echo_tools.constants import SUFFIX
 from rca_echo_tools.utils import load_data
 
@@ -17,6 +19,9 @@ def plot_daily_echogram(
     to compute mean volume backscattering strength (MVBS) that result in gridded data at uniform 
     spatial and temporal intervals based on either number of indices or label values (phyiscal units).
     """
+    output_dir = Path("./output")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     unbinned_ds = load_data(f"{refdes}-{SUFFIX}")
     unbinned_ds_day = unbinned_ds.sel(ping_time=slice(date, date + timedelta(days=1)))
 
@@ -27,3 +32,12 @@ def plot_daily_echogram(
         ping_time_bin=ping_time_bin,
         range_bin=range_bin,
     )
+
+    ds_MVBS["Sv"].plot(
+    x="ping_time",
+    row="channel",
+    figsize=(15, 7),
+    vmin=-100, 
+    vmax=-30,
+    cmap="jet"
+)
