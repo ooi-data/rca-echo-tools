@@ -73,11 +73,13 @@ def echo_raw_data_harvest(
             end_dt,
         )
 
-        print(
-            f"Processing batch {batch_start:%Y-%m-%d} → {batch_end:%Y-%m-%d}"
-        )
-
-        # 1. Collect URLs for this batch only
+        # convert to str for metadata tracking purposes, update metadata after each day
+        batch_start_str = batch_start.strftime("%Y/%m/%d")
+        batch_end_str = batch_end.strftime("%Y/%m/%d")
+        batch_days_strings = get_day_strings(batch_start_str, batch_end_str)
+        
+        print(f"Processing day {batch_start_str}")
+        # 1. Collect URLs for this batch (day) only
         batch_urls = []
 
         dt = batch_start
@@ -125,19 +127,18 @@ def echo_raw_data_harvest(
             del ds_Sv  # free up memory
 
         # 4. Move to next batch
+        print("Updating metadata JSON.")
+        update_metadata_json(
+            run_type=run_type,
+            metadata_day_keys=batch_days_strings, 
+            waveform_mode=waveform_mode,
+            encode_mode=encode_mode,
+            sonar_model=sonar_model,
+            fs=fs, 
+            metadata_path=metadata_json_path
+        )
         batch_start = batch_end + timedelta(days=1)
     
-    print("Updating metadata JSON.")
-    update_metadata_json(
-        run_type=run_type,
-        metadata_day_keys=days_strings, 
-        waveform_mode=waveform_mode,
-        encode_mode=encode_mode,
-        sonar_model=sonar_model,
-        fs=fs, 
-        metadata_path=metadata_json_path
-    )
-
     #print("Consolidating Zarr metadata") #NOTE zarr 3 doesn't use consolidate metadata
     #zarr.consolidate_metadata(store) 
 
