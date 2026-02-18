@@ -95,8 +95,6 @@ def echo_raw_data_harvest(
             continue
 
         # 2. Parse + compute Sv for this batch
-        Sv_list = []
-
         for url in batch_urls:
             print(f"Parsing raw data for {url}.")
             ed = ep.open_raw(url, sonar_model=sonar_model)
@@ -109,31 +107,22 @@ def echo_raw_data_harvest(
 
             # TODO variable validation here
             ds_Sv = clean_and_validate_Sv_ds(ds_Sv)
-
-            Sv_list.append(ds_Sv)
-
             del ed
 
-        print("<<< Concatenating Sv for this batch. >>>")
-        combined_ds = xr.concat(Sv_list, dim="ping_time", join="outer")
+            # 3. Write / append to Zarr
+            write_mode = "w" if not store_exists else "a"
 
-        del Sv_list  # free up memory
+            # TODO check what auto chunking is doing?
+            print("------ Writing backscatter variables to Zarr store. ------")
+            ds_Sv.to_zarr(
+                store_path,
+                mode=write_mode,
+                append_dim="ping_time" if store_exists else None,
+                storage_options=fs_kwargs,
+            )
 
-        # 3. Write / append to Zarr
-        write_mode = "w" if not store_exists else "a"
-
-        # TODO check what auto chunking is doing?
-        print("------ Writing batch to Zarr store. ------")
-        combined_ds.to_zarr(
-            store_path,
-            mode=write_mode,
-            append_dim="ping_time" if store_exists else None,
-            storage_options=fs_kwargs,
-        )
-
-        store_exists = True 
-
-        del combined_ds  # free up memory
+            store_exists = True 
+            del ds_Sv  # free up memory
 
         # 4. Move to next batch
         batch_start = batch_end + timedelta(days=1)
@@ -149,9 +138,8 @@ def echo_raw_data_harvest(
         metadata_path=metadata_json_path
     )
 
-    # 5. Consolidate metadata ONCE 
-    #print("Consolidating Zarr metadata") #TODO zarr 3 doesn't use consolidate metadata
-    #zarr.consolidate_metadata(store) # TODO
+    #print("Consolidating Zarr metadata") #NOTE zarr 3 doesn't use consolidate metadata
+    #zarr.consolidate_metadata(store) 
 
 
 @task
