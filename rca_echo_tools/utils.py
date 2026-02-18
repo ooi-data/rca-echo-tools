@@ -1,5 +1,9 @@
 import os
+import s3fs
+import xarray as xr 
+
 from prefect.exceptions import MissingContextError
+from constants import DATA_BUCKET
 # TODO unify utils for all RCA repos
 
 def select_logger():
@@ -23,3 +27,12 @@ def get_s3_kwargs():
 
     s3_kwargs = {"key": aws_key, "secret": aws_secret}
     return s3_kwargs
+
+
+def load_data(stream_name: str):
+    fs = s3fs.S3FileSystem()
+    zarr_dir = DATA_BUCKET + stream_name
+    print(f"loading zarr from {zarr_dir}")
+    zarr_store = fs.get_mapper(zarr_dir)
+    ds = xr.open_zarr(zarr_store, consolidated=False)
+    return ds
