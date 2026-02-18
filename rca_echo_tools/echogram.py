@@ -1,7 +1,7 @@
 import echopype as ep
 
 from datetime import datetime, timedelta
-from constants import SUFFIX
+from rca_echo_tools.constants import SUFFIX
 from rca_echo_tools.utils import load_data
 
 

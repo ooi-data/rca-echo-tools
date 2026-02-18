@@ -3,7 +3,7 @@ import s3fs
 import xarray as xr 
 
 from prefect.exceptions import MissingContextError
-from constants import DATA_BUCKET
+from rca_echo_tools.constants import DATA_BUCKET
 # TODO unify utils for all RCA repos
 
 def select_logger():
