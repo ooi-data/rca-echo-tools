@@ -142,10 +142,7 @@ def echo_raw_data_harvest(
             metadata_path=metadata_json_path
         )
         batch_start = batch_end + timedelta(days=1)
-        print(f"batch start updated to {batch_start:%Y-%m-%d}")
-    
-    #print("Consolidating Zarr metadata") #NOTE zarr 3 doesn't use consolidate metadata
-    #zarr.consolidate_metadata(store) 
+        #NOTE no metadata consolidation in zarr v3
 
 
 @task
