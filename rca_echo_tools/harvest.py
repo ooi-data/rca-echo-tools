@@ -132,7 +132,7 @@ def echo_raw_data_harvest(
             del ds_Sv  # free up memory
 
         # 4. Move to next batch
-        print("Updating metadata JSON.")
+        print("------ Updating metadata JSON. ------")
         update_metadata_json(
             metadata_day_keys=batch_days_strings, 
             waveform_mode=waveform_mode,
