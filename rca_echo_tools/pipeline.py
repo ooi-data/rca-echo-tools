@@ -1,7 +1,6 @@
 import click
 
 from prefect.deployments import run_deployment
-from importlib.metadata import distributions
 
 from rca_echo_tools.harvest import echo_raw_data_harvest
 from rca_echo_tools.constants import DATA_BUCKET, DEFAULT_DEPLOYMENT
@@ -52,8 +51,6 @@ def run_echo_raw_data_harvest(
     logger = select_logger()
     run_name = f"{refdes}_{start_date.replace('/', '')}_{end_date.replace('/', '')}"
 
-    installed_packages = {dist.metadata["Name"]: dist.version for dist in distributions()}
-    logger.info(f"Installed packages: {installed_packages}")
     if cloud:
         print(f"Launching pipeline in cloud for {run_name}")
         params = {

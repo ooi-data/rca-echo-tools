@@ -1,8 +1,10 @@
 """module for harvesting .raw echosounder data and writing to chunked zarr store"""
 import json
+from fastapi import logger
 import fsspec
 import logging 
 import sys
+from importlib_metadata import distributions
 import xarray as xr
 import echopype as ep
 
@@ -32,6 +34,8 @@ def echo_raw_data_harvest(
     batch_size_days: int = 1
 ):
     restore_logging_for_prefect()
+    # installed_packages = {dist.metadata["Name"]: dist.version for dist in distributions()}
+    # print(f"Installed packages: {installed_packages}")
 
     fs_kwargs = get_s3_kwargs()
     fs = fsspec.filesystem("s3", **fs_kwargs)
