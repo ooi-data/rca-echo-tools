@@ -43,13 +43,11 @@ def echo_raw_data_harvest(
     store_path = f"{data_bucket}/{refdes}-{SUFFIX}/"
     metadata_json_path = f"{METADATA_JSON_BUCKET}/harvest-status/{refdes}-{SUFFIX}/"
     
-    days_strings = get_day_strings(start_date, end_date)
-
-    if run_type not in ["refresh"]:
-        with fs.open(metadata_json_path, "r") as f:
-            metadata_dict = json.load(f)
+    days_strings = get_day_strings(start_date, end_date)   
 
     if run_type in ["append"]:
+        with fs.open(metadata_json_path, "r") as f:
+            metadata_dict = json.load(f)
         overlap_days = []
         for day in days_strings:
             if day in metadata_dict.keys():
@@ -65,6 +63,9 @@ def echo_raw_data_harvest(
         raise FileExistsError("`--refresh` specified, but zarr store already exists. Please either " \
         "delete existing store and run refesh again, or specify `--append` if you just wish to modify " \
         "existing store.")
+    if run_type == "refresh":
+        print("WIPING EXISTING METADATA JSON")
+        fs.rm(metadata_json_path, recursive=True)
 
     start_dt = datetime.strptime(start_date, "%Y/%m/%d")
     end_dt = datetime.strptime(end_date, "%Y/%m/%d")
@@ -133,7 +134,6 @@ def echo_raw_data_harvest(
         # 4. Move to next batch
         print("Updating metadata JSON.")
         update_metadata_json(
-            run_type=run_type,
             metadata_day_keys=batch_days_strings, 
             waveform_mode=waveform_mode,
             encode_mode=encode_mode,
@@ -150,7 +150,6 @@ def echo_raw_data_harvest(
 
 @task
 def update_metadata_json(
-    run_type: str,
     metadata_day_keys: list[str], 
     waveform_mode: str,
     encode_mode: str,
@@ -168,18 +167,14 @@ def update_metadata_json(
         for day in metadata_day_keys
     }
 
-    if run_type == "refresh":
-        final_metadata = new_entries
+    # Load existing metadata
+    if fs.exists(metadata_path):
+        with fs.open(metadata_path, "r") as f:
+            existing_metadata = json.load(f)
+    else:
+        existing_metadata = {}
 
-    elif run_type == "append":
-        # Load existing metadata
-        if fs.exists(metadata_path):
-            with fs.open(metadata_path, "r") as f:
-                existing_metadata = json.load(f)
-        else:
-            existing_metadata = {}
-
-        final_metadata = {**existing_metadata, **new_entries}
+    final_metadata = {**existing_metadata, **new_entries}
 
     # Write final metadata in one shot
     with fs.open(metadata_path, "w") as f:
