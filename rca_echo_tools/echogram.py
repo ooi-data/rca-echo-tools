@@ -27,7 +27,9 @@ def plot_daily_echogram(
     print(f"---- Launching: daily echogram for {refdes} on {date} with"
           f" ping_time_bin={ping_time_bin} and range_bin={range_bin} ----")
 
-    dt = datetime.strptime(date, "%Y/%m/%d")
+    dt = datetime.strptime(date, "%Y/%m/%d") # python datetime format
+    date_tag = date.strftime("%Y%m%d") # for file naming no '/'
+
     output_dir = Path("./output")
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -59,4 +61,4 @@ def plot_daily_echogram(
     for ax, channel in zip(facet_grid.axes.flat, channels):
         ax.set_title(channel)
 
-    plt.savefig(f"{str(output_dir)}/{instrument}_{date}.png")
+    plt.savefig(f"{str(output_dir)}/{instrument}_{date_tag}.png")
