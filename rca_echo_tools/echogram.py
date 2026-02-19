@@ -28,7 +28,7 @@ def plot_daily_echogram(
           f" ping_time_bin={ping_time_bin} and range_bin={range_bin} ----")
 
     dt = datetime.strptime(date, "%Y/%m/%d") # python datetime format
-    date_tag = date.strftime("%Y%m%d") # for file naming no '/'
+    date_tag = date.replace("/", "") # for file naming no '/'
 
     output_dir = Path("./output")
     output_dir.mkdir(parents=True, exist_ok=True)
