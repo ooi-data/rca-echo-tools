@@ -31,8 +31,8 @@ rca-echo-harvest --refdes "CE04OSPS-PC01B-05-ZPLSCB102" \
 Create daily echograms in parallel on RCA ECS cluster:
 ```
 rca-daily-echograms --refdes "CE04OSPS-PC01B-05-ZPLSCB102" \
-    --start-date "2026/01/01" \
-    --end-date "2026/02/21" \
-    --parallel-in-cloud "False" \
-    --s3-sync "True"
+--start-date "2026/01/01" \
+--end-date "2026/02/21" \
+--parallel-in-cloud "False" \
+--s3-sync "True"
 ```
