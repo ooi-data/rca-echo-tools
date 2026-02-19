@@ -8,6 +8,7 @@ from prefect import flow
 from rca_echo_tools.constants import SUFFIX
 from rca_echo_tools.utils import load_data, restore_logging_for_prefect
 
+plt.use('Agg') # use non-interactive backend for plotting
 
 @flow(log_prints=True)
 def plot_daily_echogram(
