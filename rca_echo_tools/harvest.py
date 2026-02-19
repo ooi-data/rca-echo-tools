@@ -116,7 +116,6 @@ def echo_raw_data_harvest(
             # 3. Write / append to Zarr
             write_mode = "w" if not store_exists else "a"
 
-            # TODO check what auto chunking is doing?
             print("------ Writing backscatter variables to Zarr store. ------")
             ds_Sv.to_zarr(
                 store_path,
