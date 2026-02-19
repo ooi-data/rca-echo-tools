@@ -67,7 +67,7 @@ def plot_daily_echogram(
         figsize=(18, 9),
         vmin=-100,
         vmax=-30,
-        cmap=rs.lavendula
+        cmap=rs.roseus
     )
 
     for ax, channel in zip(facet_grid.axes.flat, channels):
