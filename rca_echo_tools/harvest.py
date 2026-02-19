@@ -1,10 +1,7 @@
 """module for harvesting .raw echosounder data and writing to chunked zarr store"""
 import json
-from fastapi import logger
 import fsspec
-import logging 
-import sys
-from importlib_metadata import distributions
+
 import xarray as xr
 import echopype as ep
 
@@ -16,7 +13,7 @@ from rca_echo_tools.constants import (
     VARIABLES_TO_INCLUDE,
     METADATA_JSON_BUCKET,
 )
-from rca_echo_tools.utils import get_s3_kwargs 
+from rca_echo_tools.utils import get_s3_kwargs, restore_logging_for_prefect
 
 
 # we need to write to zarr at intervals instead of concatenating the whole thing TODO
@@ -218,26 +215,6 @@ def clean_and_validate_Sv_ds(ds_Sv: xr.Dataset):
             raise ValueError(f"Expected variable {var} not found in Sv dataset.")
     
     return ds_Sv
-
-
-def restore_logging_for_prefect():
-    """echopype alters loggin configs in a way that breaks prefect logging. 
-    This function should restore it in most cases."""
-    root = logging.getLogger()
-
-    # Remove all handlers echopype installed
-    for h in list(root.handlers):
-        root.removeHandler(h)
-
-    logging.disable(logging.NOTSET)  # undo echopype's global disable
-    root.setLevel(logging.INFO)
-
-    handler = logging.StreamHandler(sys.stdout)
-    formatter = logging.Formatter(
-        "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
-    )
-    handler.setFormatter(formatter)
-    root.addHandler(handler)
 
 
 def get_day_strings(start_date: str, end_date: str) -> list[str]:
