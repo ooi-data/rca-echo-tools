@@ -67,7 +67,8 @@ def echo_raw_data_harvest(
         )
     if run_type == "refresh":
         print("WIPING EXISTING METADATA JSON")
-        fs.rm(metadata_json_path, recursive=True)
+        if fs.exists(metadata_json_path):
+            fs.rm(metadata_json_path, recursive=True)
 
     start_dt = datetime.strptime(start_date, "%Y/%m/%d")
     end_dt = datetime.strptime(end_date, "%Y/%m/%d")
