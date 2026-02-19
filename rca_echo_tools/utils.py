@@ -35,7 +35,7 @@ def get_s3_kwargs():
 def load_data(stream_name: str):
     fs = s3fs.S3FileSystem()
     zarr_dir = f"{DATA_BUCKET}/{stream_name}"
-    print(f"loading zarr from {zarr_dir}")
+    print(f"loading zarr metadata from {zarr_dir}")
     zarr_store = fs.get_mapper(zarr_dir)
     ds = xr.open_zarr(zarr_store, consolidated=False)
     return ds
