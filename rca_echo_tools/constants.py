@@ -55,6 +55,6 @@ VARIABLES_TO_INCLUDE = [
     "water_level",
 ]
 
-DEFAULT_DEPLOYMENT = "echo_raw_data_harvest_8vcpu_60gb"
-
+DEFAULT_HARVEST_DEPLOYMENT = "echo_raw_data_harvest_8vcpu_60gb"
+DEFAULT_ECHOGRAM_DEPLOYMENT = "daily_echogram_2vcpu_16gb"
 
