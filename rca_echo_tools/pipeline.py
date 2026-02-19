@@ -99,6 +99,7 @@ def run_echo_raw_data_harvest(
 @click.option("--ping-time-bin", required=False, type=str, default="4s", help="Time bin size for ping_time dimension default is 4s")
 @click.option("--range-bin", required=False, type=str, default="0.1m", help="Range bin size for range dimension, default is 0.1m")
 @click.option("--parallel-in-cloud", type=bool, default=False, show_default=True, help="run prefect deployment in parellel in cloud, parallelized by date")
+@click.option("--s3-sync", type=bool, default=False, show_default=True, help="Whether to sync resulting echogram PNGs to s3.")
 def run_daily_echograms(
     refdes: str,
     start_date: str,
@@ -106,14 +107,15 @@ def run_daily_echograms(
     ping_time_bin: str,
     range_bin: str,
     parallel_in_cloud: bool,
-):
+    s3_sync: bool,
+):  
     start_dt = datetime.strptime(start_date, "%Y/%m/%d")
     end_dt = datetime.strptime(end_date, "%Y/%m/%d") if end_date else start_dt
     dt_list = [start_dt + timedelta(days=i) for i in range((end_dt - start_dt).days + 1)]
 
     # Build params for each date
     all_params = [
-        {"date": d.strftime("%Y/%m/%d"), "refdes": refdes, "ping_time_bin": ping_time_bin,"range_bin": range_bin}
+        {"date": d.strftime("%Y/%m/%d"), "refdes": refdes, "ping_time_bin": ping_time_bin,"range_bin": range_bin, "s3_sync": s3_sync}
         for d in dt_list
     ]
 

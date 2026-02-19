@@ -5,8 +5,9 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from prefect import flow
 
-from rca_echo_tools.constants import SUFFIX
+from rca_echo_tools.constants import SUFFIX, VIZ_BUCKET
 from rca_echo_tools.utils import load_data, restore_logging_for_prefect
+from rca_echo_tools.cloud import sync_png_to_s3
 
 plt.switch_backend('Agg') # use non-interactive backend for plotting
 
@@ -16,6 +17,7 @@ def plot_daily_echogram(
     refdes: str,
     ping_time_bin: str="4s",
     range_bin: str="0.1m",
+    s3_sync: bool = False,
     ):
     """
     Wraps echopype commongrid. From echopype docs:
@@ -62,3 +64,7 @@ def plot_daily_echogram(
         ax.set_title(channel)
 
     plt.savefig(f"{str(output_dir)}/{instrument}_{date_tag}.png")
+
+    if s3_sync:
+        print(f"Syncing echograms to {VIZ_BUCKET}")
+        sync_png_to_s3(instrument, date, local_dir=output_dir)

@@ -2,5 +2,5 @@
 __pycache__/
 *.py[codz]
 *$py.class
-
+output/
 .vscode

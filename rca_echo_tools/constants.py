@@ -4,6 +4,8 @@ from datetime import datetime
 # time periods when echosounders were in different modes 
 
 DATA_BUCKET = "s3://ooi-data"
+VIZ_BUCKET = "s3://ooi-rca-qaqc-prod"
+
 METADATA_JSON_BUCKET = "s3://flow-process-bucket"
 TEST_BUCKET = "s3://temp-ooi-data-prod" # TODO
 
