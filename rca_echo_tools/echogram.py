@@ -6,8 +6,8 @@ from pathlib import Path
 from prefect import flow
 
 from rca_echo_tools.constants import SUFFIX, VIZ_BUCKET
-from rca_echo_tools.utils import load_data, restore_logging_for_prefect
-from rca_echo_tools.cloud import sync_png_to_s3, get_s3_kwargs
+from rca_echo_tools.utils import load_data, restore_logging_for_prefect, get_s3_kwargs
+from rca_echo_tools.cloud import sync_png_to_s3
 
 plt.switch_backend('Agg') # use non-interactive backend for plotting
 
