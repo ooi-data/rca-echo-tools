@@ -7,7 +7,7 @@ from prefect import flow
 
 from rca_echo_tools.constants import SUFFIX, VIZ_BUCKET
 from rca_echo_tools.utils import load_data, restore_logging_for_prefect
-from rca_echo_tools.cloud import sync_png_to_s3
+from rca_echo_tools.cloud import sync_png_to_s3, get_s3_kwargs
 
 plt.switch_backend('Agg') # use non-interactive backend for plotting
 
@@ -26,6 +26,7 @@ def plot_daily_echogram(
     spatial and temporal intervals based on either number of indices or label values (phyiscal units).
     """
     restore_logging_for_prefect()
+    s3_kwargs = get_s3_kwargs() 
     print(f"---- Launching: daily echogram for {refdes} on {date} with"
           f" ping_time_bin={ping_time_bin} and range_bin={range_bin} ----")
 
@@ -63,8 +64,18 @@ def plot_daily_echogram(
     for ax, channel in zip(facet_grid.axes.flat, channels):
         ax.set_title(channel)
 
+    fig = facet_grid.fig
+    fig.text(
+    0.99, 0.01,
+    f"ping_time_bin={ping_time_bin}\nrange_bin={range_bin}",
+    ha='right', va='bottom',
+    fontsize=8, color='black',
+    transform=fig.transFigure
+    )
+
+
     plt.savefig(f"{str(output_dir)}/{instrument}_{date_tag}.png")
 
     if s3_sync:
         print(f"Syncing echograms to {VIZ_BUCKET}")
-        sync_png_to_s3(instrument, date, local_dir=output_dir)
+        sync_png_to_s3(instrument, date, s3_kwargs=s3_kwargs, local_dir=output_dir)
