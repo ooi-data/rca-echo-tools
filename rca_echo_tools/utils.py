@@ -1,5 +1,8 @@
 import os
 import s3fs
+import logging 
+import sys
+
 import xarray as xr 
 
 from prefect.exceptions import MissingContextError
@@ -31,8 +34,28 @@ def get_s3_kwargs():
 
 def load_data(stream_name: str):
     fs = s3fs.S3FileSystem()
-    zarr_dir = DATA_BUCKET + stream_name
+    zarr_dir = f"{DATA_BUCKET}/{stream_name}"
     print(f"loading zarr from {zarr_dir}")
     zarr_store = fs.get_mapper(zarr_dir)
     ds = xr.open_zarr(zarr_store, consolidated=False)
     return ds
+
+
+def restore_logging_for_prefect():
+    """echopype alters loggin configs in a way that breaks prefect logging. 
+    This function should restore it in most cases."""
+    root = logging.getLogger()
+
+    # Remove all handlers echopype installed
+    for h in list(root.handlers):
+        root.removeHandler(h)
+
+    logging.disable(logging.NOTSET)  # undo echopype's global disable
+    root.setLevel(logging.INFO)
+
+    handler = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter(
+        "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+    )
+    handler.setFormatter(formatter)
+    root.addHandler(handler)
