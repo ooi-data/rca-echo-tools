@@ -103,13 +103,13 @@ def echo_raw_data_harvest(
             print(f"Parsing raw data for {url}.")
             ed = ep.open_raw(url, sonar_model=sonar_model)
             print(f"Computing Sv for {url}.")
-            ds_Sv = ep.calibrate.compute_Sv( #TODO echopype zarr suggestion?
+            ds_Sv = ep.calibrate.compute_Sv(
                 ed,
                 waveform_mode=waveform_mode,
                 encode_mode=encode_mode,
             )
 
-            # TODO variable validation here
+            # variable validation here in future if needed
             ds_Sv = clean_and_validate_Sv_ds(ds_Sv)
             del ed
 

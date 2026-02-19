@@ -7,7 +7,7 @@ import xarray as xr
 
 from prefect.exceptions import MissingContextError
 from rca_echo_tools.constants import DATA_BUCKET
-# TODO unify utils for all RCA repos
+
 
 def select_logger():
     from prefect import get_run_logger

@@ -1,15 +1,7 @@
-from datetime import datetime
-
-#ZARR_DAY_0 = datetime(2025, 9, 1) #TODO remove? or have some constant about 
-# time periods when echosounders were in different modes 
 
 DATA_BUCKET = "s3://ooi-data"
 VIZ_BUCKET = "s3://ooi-rca-qaqc-prod"
-
 METADATA_JSON_BUCKET = "s3://flow-process-bucket"
-TEST_BUCKET = "s3://temp-ooi-data-prod" # TODO
-
-VIZ_BUCKET = "s3://ooi-rca-qaqc-prod"
 
 ECHO_REFDES_LIST = [
      "CE02SHBP-MJ01C-07-ZPLSCB101",
