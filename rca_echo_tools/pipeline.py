@@ -1,13 +1,18 @@
 import click
 
 from prefect.deployments import run_deployment
+from datetime import datetime, timedelta, timezone
 
 from rca_echo_tools.harvest import echo_raw_data_harvest
 from rca_echo_tools.constants import DATA_BUCKET, DEFAULT_DEPLOYMENT
 from rca_echo_tools.utils import select_logger
+from rca_echo_tools.echogram import plot_daily_echogram
 
-# we need to write to zarr at intervals instead of concatenating the whole thing TODO
-# batch processing pattern TODO
+# get yesterday's date in YYYY/MM/DD format
+now_utc = datetime.now(timezone.utc)
+yesterday_utc = now_utc - timedelta(days=1)
+yesterday = yesterday_utc.strftime("%Y/%m/%d")
+
 @click.command()
 @click.option("--start-date", required=True, type=str, help="Start date in YYYY/MM/DD format")
 @click.option("--end-date", required=True, type=str, help="End date in YYYY/MM/DD format")
@@ -86,5 +91,55 @@ def run_echo_raw_data_harvest(
             batch_size_days=batch_size_days,
         )
 
+
+@click.command()
+@click.option("--refdes", required=True, type=str, help="Reference designator of the echosounder")
+@click.option("--start-date", required=True, type=str, default=yesterday, help="Date in the format YYYY/MM/DD (e.g., '2025/01/16'). Default is yesterday's date (UTC).")
+@click.option("--end-date", type=str, default=None, help="YYYY/MM/DD leave blank to run a single day")
+@click.option("--ping-time-bin", required=False, type=str, default="4s", help="Time bin size for ping_time dimension default is 4s")
+@click.option("--range-bin", required=False, type=str, default="0.1m", help="Range bin size for range dimension, default is 0.1m")
+@click.option("--parallel-in-cloud", type=bool, default=False, show_default=True, help="run prefect deployment in parellel in cloud, parallelized by date")
+def run_daily_echograms(
+    refdes: str,
+    start_date: str,
+    end_date: str,
+    ping_time_bin: str,
+    range_bin: str,
+    parallel_in_cloud: bool,
+):
+    start_dt = datetime.strptime(start_date, "%Y/%m/%d")
+    end_dt = datetime.strptime(end_date, "%Y/%m/%d") if end_date else start_dt
+    dt_list = [start_dt + timedelta(days=i) for i in range((end_dt - start_dt).days + 1)]
+
+    # Build params for each date
+    all_params = [
+        {"date": d.strftime("%Y/%m/%d"), "refdes": refdes, "ping_time_bin": ping_time_bin,"range_bin": range_bin}
+        for d in dt_list
+    ]
+
+    # Dispatch — same loop, different runner
+    runner = _run_cloud if parallel_in_cloud else _run_local
+    for params in all_params:
+        runner(params)
+
+
+def _run_cloud(params):
+    date_str = params['date']
+    run_name = f"{params['refdes']}_{date_str.replace('/', '')}_echogram"
+
+    print(f"Launching workflow for {run_name} in cloud")
+    run_deployment(
+        name=run_name,
+        parameters=params,
+        flow_run_name=run_name,
+        timeout=3, # seconds to not hammer the zarr too hard
+    )
+
+
+def _run_local(params):
+    plot_daily_echogram(**params)
+
+
 if __name__ == "__main__":
-    run_echo_raw_data_harvest()
+    #run_echo_raw_data_harvest()
+    run_daily_echograms()
