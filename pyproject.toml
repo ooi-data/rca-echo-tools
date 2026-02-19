@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rca-echo-tools"
-version = "0.3.0"
+version = "1.0.0"
 description = "echosounder harvest and viz tools"
 authors = [
   { name = "Joe Duprey", email = "jduprey@uw.edu" },
@@ -29,6 +29,7 @@ dependencies = [
 
 [project.scripts]
 rca-echo-harvest = "rca_echo_tools.pipeline:run_echo_raw_data_harvest"
+rca-daily-echograms = "rca_echo_tools.pipeline:run_daily_echograms"
 
 [tool.ruff]
 line-length = 95
