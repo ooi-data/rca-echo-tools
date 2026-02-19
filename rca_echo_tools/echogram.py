@@ -1,4 +1,4 @@
-import roseus as rs
+import roseus.mpl as rs
 import echopype as ep
 import matplotlib.pyplot as plt
 
@@ -51,27 +51,40 @@ def plot_daily_echogram(
         range_bin=range_bin,
     )
 
+    # Map full channel strings to clean frequency labels
+    channels = ds_MVBS["channel"].values
+    channel_labels = {ch: ch for ch in channels}  # fallback
+    freq_map = {"38": "38 kHz", "120": "120 kHz", "200": "200 kHz"}
+    for ch in channels:
+        for freq, label in freq_map.items():
+            if freq in ch:
+                channel_labels[ch] = label
+
     print("Plotting downsampled array.")
     facet_grid = ds_MVBS["Sv"].plot(
-    x="ping_time",
-    row="channel",
-    figsize=(14, 7),
-    vmin=-100,
-    vmax=-30,
-    cmap=rs.cyanus
+        x="ping_time",
+        row="channel",
+        figsize=(18, 9),
+        vmin=-100,
+        vmax=-30,
+        cmap=rs.lavendula
     )
 
-    channels = ds_MVBS["channel"].values
     for ax, channel in zip(facet_grid.axes.flat, channels):
-        ax.set_title(channel)
+        ax.set_title(channel_labels[channel])
+        ax.set_xlabel("") # remove ping time label
+        ax.set_ylabel("Vertical Range (m)")
+
+    # Fix colorbar label
+    facet_grid.cbar.set_label("Sv (dB re 1 m$^{-1}$)")
 
     fig = facet_grid.fig
     fig.text(
-    0.99, 0.01,
-    f"ping_time_bin={ping_time_bin}\nrange_bin={range_bin}",
-    ha='right', va='bottom',
-    fontsize=8, color='black',
-    transform=fig.transFigure
+        0.99, 0.01,
+        f"ping_time_bin={ping_time_bin}\nrange_bin={range_bin}",
+        ha='right', va='bottom',
+        fontsize=8, color='black',
+        transform=fig.transFigure
     )
 
 
@@ -79,4 +92,4 @@ def plot_daily_echogram(
 
     if s3_sync:
         print(f"Syncing echograms to {VIZ_BUCKET}")
-        sync_png_to_s3(instrument, date, s3_kwargs=s3_kwargs, local_dir=output_dir)
+        sync_png_to_s3(instrument, date, s3_kwargs, output_dir)

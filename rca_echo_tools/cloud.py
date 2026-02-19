@@ -7,7 +7,7 @@ from datetime import datetime
 from rca_echo_tools.constants import VIZ_BUCKET
 
 @task
-def sync_png_to_s3(instrument: str, date, fs_kwargs: dict, local_dir=Path("./output")):
+def sync_png_to_s3(instrument: str, date: str, fs_kwargs: dict, local_dir: Path):
     """sync .nc and .png files to S3 based on the given date and refdes."""
     year = datetime.strptime(date, "%Y/%m/%d").year
     s3_fs = fsspec.filesystem("s3", **fs_kwargs)
