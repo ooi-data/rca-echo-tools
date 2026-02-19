@@ -1,4 +1,5 @@
 """module for harvesting .raw echosounder data and writing to chunked zarr store"""
+
 import json
 import fsspec
 
@@ -28,7 +29,7 @@ def echo_raw_data_harvest(
     sonar_model: str,
     data_bucket: str,
     run_type: str,
-    batch_size_days: int = 1
+    batch_size_days: int = 1,
 ):
     restore_logging_for_prefect()
     # installed_packages = {dist.metadata["Name"]: dist.version for dist in distributions()}
@@ -39,8 +40,8 @@ def echo_raw_data_harvest(
 
     store_path = f"{data_bucket}/{refdes}-{SUFFIX}/"
     metadata_json_path = f"{METADATA_JSON_BUCKET}/harvest-status/{refdes}-{SUFFIX}/"
-    
-    days_strings = get_day_strings(start_date, end_date)   
+
+    days_strings = get_day_strings(start_date, end_date)
 
     if run_type in ["append"]:
         with fs.open(metadata_json_path, "r") as f:
@@ -50,16 +51,20 @@ def echo_raw_data_harvest(
             if day in metadata_dict.keys():
                 overlap_days.append(day)
         if len(overlap_days) > 0:
-            raise ValueError(f"Date {overlap_days} already exists in metadata JSON. Please either "
-                                "remove this date from the JSON if you wish to reprocess it, or "
-                                "specify `--refresh` if you wish to overwrite existing data for "
-                                "the entire date range.")
+            raise ValueError(
+                f"Date {overlap_days} already exists in metadata JSON. Please either "
+                "remove this date from the JSON if you wish to reprocess it, or "
+                "specify `--refresh` if you wish to overwrite existing data for "
+                "the entire date range."
+            )
 
     store_exists = fs.exists(store_path)
     if run_type == "refresh" and store_exists:
-        raise FileExistsError("`--refresh` specified, but zarr store already exists. Please either " \
-        "delete existing store and run refesh again, or specify `--append` if you just wish to modify " \
-        "existing store.")
+        raise FileExistsError(
+            "`--refresh` specified, but zarr store already exists. Please either "
+            "delete existing store and run refesh again, or specify `--append` if you just wish to modify "
+            "existing store."
+        )
     if run_type == "refresh":
         print("WIPING EXISTING METADATA JSON")
         fs.rm(metadata_json_path, recursive=True)
@@ -79,7 +84,7 @@ def echo_raw_data_harvest(
         batch_start_str = batch_start.strftime("%Y/%m/%d")
         batch_end_str = batch_end.strftime("%Y/%m/%d")
         batch_days_strings = get_day_strings(batch_start_str, batch_end_str)
-        
+
         print(f"Processing day {batch_start_str}")
         # 1. Collect URLs for this batch (day) only
         batch_urls = []
@@ -124,31 +129,31 @@ def echo_raw_data_harvest(
                 storage_options=fs_kwargs,
             )
 
-            store_exists = True 
+            store_exists = True
             del ds_Sv  # free up memory
 
         # 4. Move to next batch
         print("------ Updating metadata JSON. ------")
         update_metadata_json(
-            metadata_day_keys=batch_days_strings, 
+            metadata_day_keys=batch_days_strings,
             waveform_mode=waveform_mode,
             encode_mode=encode_mode,
             sonar_model=sonar_model,
-            fs=fs, 
-            metadata_path=metadata_json_path
+            fs=fs,
+            metadata_path=metadata_json_path,
         )
         batch_start = batch_end + timedelta(days=1)
-        #NOTE no metadata consolidation in zarr v3
+        # NOTE no metadata consolidation in zarr v3
 
 
 @task
 def update_metadata_json(
-    metadata_day_keys: list[str], 
+    metadata_day_keys: list[str],
     waveform_mode: str,
     encode_mode: str,
     sonar_model: str,
-    fs: fsspec.filesystem, 
-    metadata_path: str
+    fs: fsspec.filesystem,
+    metadata_path: str,
 ):
     # Build new entries for this run
     new_entries = {
@@ -172,8 +177,8 @@ def update_metadata_json(
     # Write final metadata in one shot
     with fs.open(metadata_path, "w") as f:
         json.dump(final_metadata, f, indent=2)
-    
-    
+
+
 @task
 def get_raw_urls(day_str: str, refdes: str):
 
@@ -198,7 +203,8 @@ def get_raw_urls(day_str: str, refdes: str):
 
     return data_url_list
 
-@task # missing variable padding could occur here as well if needed
+
+@task  # missing variable padding could occur here as well if needed
 def clean_and_validate_Sv_ds(ds_Sv: xr.Dataset):
 
     var_dropped_list = []
@@ -206,13 +212,13 @@ def clean_and_validate_Sv_ds(ds_Sv: xr.Dataset):
         if var in VARIABLES_TO_EXCLUDE:
             var_dropped_list.append(var)
     ds_Sv = ds_Sv.drop_vars(var_dropped_list)
-    
+
     print(f"Dropped variables from Sv dataset: {var_dropped_list}")
 
     for var in VARIABLES_TO_INCLUDE:
         if var not in ds_Sv.data_vars:
             raise ValueError(f"Expected variable {var} not found in Sv dataset.")
-    
+
     return ds_Sv
 
 

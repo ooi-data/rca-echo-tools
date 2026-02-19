@@ -1,9 +1,9 @@
 import os
 import s3fs
-import logging 
+import logging
 import sys
 
-import xarray as xr 
+import xarray as xr
 
 from prefect.exceptions import MissingContextError
 from rca_echo_tools.constants import DATA_BUCKET
@@ -11,13 +11,15 @@ from rca_echo_tools.constants import DATA_BUCKET
 
 def select_logger():
     from prefect import get_run_logger
+
     try:
         logger = get_run_logger()
         print("using prefect logger")
     except MissingContextError as e:
         from loguru import logger
+
         print(f"using loguru logger: {e}")
-    
+
     return logger
 
 
@@ -42,7 +44,7 @@ def load_data(stream_name: str):
 
 
 def restore_logging_for_prefect():
-    """echopype alters loggin configs in a way that breaks prefect logging. 
+    """echopype alters loggin configs in a way that breaks prefect logging.
     This function should restore it in most cases."""
     root = logging.getLogger()
 
@@ -54,8 +56,6 @@ def restore_logging_for_prefect():
     root.setLevel(logging.INFO)
 
     handler = logging.StreamHandler(sys.stdout)
-    formatter = logging.Formatter(
-        "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
-    )
+    formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(name)s | %(message)s")
     handler.setFormatter(formatter)
     root.addHandler(handler)

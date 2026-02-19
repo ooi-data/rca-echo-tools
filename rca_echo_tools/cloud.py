@@ -6,6 +6,7 @@ from prefect import task
 from datetime import datetime
 from rca_echo_tools.constants import VIZ_BUCKET
 
+
 @task
 def sync_png_to_s3(instrument: str, date: str, fs_kwargs: dict, local_dir: Path):
     """sync .nc and .png files to S3 based on the given date and refdes."""
