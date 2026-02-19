@@ -1,3 +1,4 @@
+import roseus as rs
 import echopype as ep
 import matplotlib.pyplot as plt
 
@@ -57,7 +58,7 @@ def plot_daily_echogram(
     figsize=(14, 7),
     vmin=-100,
     vmax=-30,
-    cmap="jet"
+    cmap=rs.cyanus
     )
 
     channels = ds_MVBS["channel"].values
