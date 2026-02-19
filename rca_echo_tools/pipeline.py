@@ -4,7 +4,7 @@ from prefect.deployments import run_deployment
 from datetime import datetime, timedelta, timezone
 
 from rca_echo_tools.harvest import echo_raw_data_harvest
-from rca_echo_tools.constants import DATA_BUCKET, DEFAULT_DEPLOYMENT
+from rca_echo_tools.constants import DATA_BUCKET, DEFAULT_HARVEST_DEPLOYMENT, DEFAULT_ECHOGRAM_DEPLOYMENT
 from rca_echo_tools.utils import select_logger
 from rca_echo_tools.echogram import plot_daily_echogram
 
@@ -71,7 +71,7 @@ def run_echo_raw_data_harvest(
         }   
 
         run_deployment(
-            name=f"echo-raw-data-harvest/{DEFAULT_DEPLOYMENT}",
+            name=f"echo-raw-data-harvest/{DEFAULT_HARVEST_DEPLOYMENT}",
             parameters=params,
             flow_run_name=run_name,
             timeout=12,
@@ -129,7 +129,7 @@ def _run_cloud(params):
 
     print(f"Launching workflow for {run_name} in cloud")
     run_deployment(
-        name=run_name,
+        name=f"plot-daily-echogram/{DEFAULT_ECHOGRAM_DEPLOYMENT}",
         parameters=params,
         flow_run_name=run_name,
         timeout=3, # seconds to not hammer the zarr too hard
