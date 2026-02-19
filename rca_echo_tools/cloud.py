@@ -4,14 +4,12 @@ from pathlib import Path
 from prefect import task
 
 from datetime import datetime
-from rca_echo_tools.utils import get_s3_kwargs
 from rca_echo_tools.constants import VIZ_BUCKET
 
 @task
-def sync_png_to_s3(instrument: str, date, local_dir=Path("./output")):
+def sync_png_to_s3(instrument: str, date, fs_kwargs: dict, local_dir=Path("./output")):
     """sync .nc and .png files to S3 based on the given date and refdes."""
     year = datetime.strptime(date, "%Y/%m/%d").year
-    fs_kwargs = get_s3_kwargs()
     s3_fs = fsspec.filesystem("s3", **fs_kwargs)
 
     def is_valid_file(fp: Path):
