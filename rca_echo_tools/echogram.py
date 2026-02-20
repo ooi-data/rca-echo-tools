@@ -65,7 +65,7 @@ def plot_daily_echogram(
 
     print("Plotting downsampled array.")
     facet_grid = ds_MVBS["Sv"].plot(
-        x="ping_time", row="channel", figsize=(18, 9), vmin=-100, vmax=-30, cmap=rs.roseus
+        x="ping_time", row="channel", figsize=(18, 10), vmin=-100, vmax=-30, cmap=rs.roseus
     )
 
     for ax, channel in zip(facet_grid.axes.flat, channels):
@@ -87,6 +87,7 @@ def plot_daily_echogram(
         color="black",
         transform=fig.transFigure,
     )
+    fig.suptitle(refdes, fontsize=12, fontweight='bold', y=0.99, x=0.12)
 
     plt.savefig(f"{str(output_dir)}/{instrument}_{date_tag}.png")
 
