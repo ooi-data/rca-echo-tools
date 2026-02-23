@@ -53,6 +53,4 @@ VARIABLES_TO_INCLUDE = [
 
 DEFAULT_HARVEST_DEPLOYMENT = "echo_raw_data_harvest_8vcpu_60gb"
 
-# infra configs
-with resources.files("rca_echo_tools.config").joinpath("config.yaml").open("r") as f:
-    QARTOD_SKIP_CONFIG = yaml.safe_load(f)
+ECHOGRAM_INFRA_CONFIG = yaml.safe_load(resources.files("rca_echo_tools.config").joinpath("config.yaml").open("r"))
