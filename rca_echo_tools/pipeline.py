@@ -19,8 +19,8 @@ yesterday = yesterday_utc.strftime("%Y/%m/%d")
 
 
 @click.command()
-@click.option("--start-date", required=True, type=str, help="Start date in YYYY/MM/DD format")
-@click.option("--end-date", required=True, type=str, help="End date in YYYY/MM/DD format")
+@click.option("--start-date", required=True, type=str, default=yesterday, help="Start date in YYYY/MM/DD format")
+@click.option("--end-date", required=True, type=str, default=yesterday, help="End date in YYYY/MM/DD format")
 @click.option(
     "--refdes", required=True, type=str, help="Reference designator of the echosounder"
 )
