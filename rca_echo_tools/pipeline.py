@@ -193,7 +193,7 @@ def _run_cloud(params):
         name=f"plot-daily-echogram/{ECHOGRAM_INFRA_CONFIG[params['refdes']]}",
         parameters=params,
         flow_run_name=run_name,
-        timeout=3,  # seconds to not hammer the zarr too hard
+        timeout=1,
     )
 
 
