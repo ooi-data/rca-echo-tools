@@ -1,3 +1,5 @@
+import yaml 
+
 DATA_BUCKET = "s3://ooi-data"
 VIZ_BUCKET = "s3://ooi-rca-qaqc-prod"
 METADATA_JSON_BUCKET = "s3://flow-process-bucket"
@@ -49,4 +51,6 @@ VARIABLES_TO_INCLUDE = [
 ]
 
 DEFAULT_HARVEST_DEPLOYMENT = "echo_raw_data_harvest_8vcpu_60gb"
-DEFAULT_ECHOGRAM_DEPLOYMENT = "daily_echogram_2vcpu_16gb"
+
+with open("./rca_echo_tools/config/config.yaml", "r") as f:
+    ECHOGRAM_INFRA_CONFIG = yaml.safe_load(f)

@@ -45,3 +45,16 @@ deployments:
       memory: 16384
   schedule:
   is_schedule_active:
+- name: daily_echogram_4vcpu_30gb
+  version:
+  tags: []
+  description:
+  entrypoint: rca_echo_tools/echogram.py:plot_daily_echogram
+  parameters: {}
+  work_pool:
+    name: hydrophone-pool
+    work_queue_name:
+    job_variables:
+      image: "jdduprey/rca-echo-tools:latest"
+  schedule:
+  is_schedule_active:
