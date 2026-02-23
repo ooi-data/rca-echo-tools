@@ -1,4 +1,5 @@
 import yaml 
+from pathlib import Path
 
 DATA_BUCKET = "s3://ooi-data"
 VIZ_BUCKET = "s3://ooi-rca-qaqc-prod"
@@ -52,5 +53,6 @@ VARIABLES_TO_INCLUDE = [
 
 DEFAULT_HARVEST_DEPLOYMENT = "echo_raw_data_harvest_8vcpu_60gb"
 
+print("cwd:", str(Path.cwd()))
 with open("./rca_echo_tools/config/config.yaml", "r") as f:
     ECHOGRAM_INFRA_CONFIG = yaml.safe_load(f)
