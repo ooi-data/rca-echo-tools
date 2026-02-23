@@ -45,6 +45,9 @@ def plot_daily_echogram(
     unbinned_ds = load_data(f"{refdes}-{SUFFIX}")
     unbinned_ds_day = unbinned_ds.sel(ping_time=slice(dt, dt + timedelta(days=1)))
 
+    if len(unbinned_ds_day["ping_time"]) == 0:
+        raise ValueError(f"No data found for {refdes} on {date}.")
+
     print("Downsampling data with ep commongrid to deal with offset ping nans.")
     # Reduce data based on sample number
     ds_MVBS = ep.commongrid.compute_MVBS(
