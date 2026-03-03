@@ -75,7 +75,7 @@ def plot_daily_echogram(
 
     for ax, channel in zip(facet_grid.axes.flat, channels):
         ax.set_title(channel_labels[channel])
-        ax.set_xlabel("UTC")
+        ax.set_xlabel("UTC") if ax.is_last_row() else ax.set_xlabel("")
         ax.set_ylabel("Vertical Range (m)")
 
     # Fix colorbar label
