@@ -36,3 +36,9 @@ rca-daily-echograms --refdes "CE04OSPS-PC01B-05-ZPLSCB102" \
 --parallel-in-cloud "False" \
 --s3-sync "True"
 ```
+
+# EK80 deployment configuration nodes 
+Oregon Shelf system `CE02SHBP-MJ01C-07-ZPLSCB101` was running in CW mode for almost all of the 2024-2025 deployment. 
+The Offshore system `CE04OSPS-PC01B-05-ZPLSCB102` was in CW for the first week or so and then in limited FM mode.
+
+Both systems were put into alternating CW/FM between `2026-05-30` and `2025-07-18`.
