@@ -54,3 +54,6 @@ VARIABLES_TO_INCLUDE = [
 DEFAULT_HARVEST_DEPLOYMENT = "echo_raw_data_harvest_8vcpu_60gb"
 
 ECHOGRAM_INFRA_CONFIG = yaml.safe_load(resources.files("rca_echo_tools.config").joinpath("config.yaml").open("r"))
+
+SUBDEPLOYMENTS = yaml.safe_load(resources.files("rca_echo_tools.config").joinpath("processing_deployments.yaml").open("r"))
+# subdeployments are time spans when EK80 and EK60 instruments were run under the same configs, which sometime vary within a deployment.

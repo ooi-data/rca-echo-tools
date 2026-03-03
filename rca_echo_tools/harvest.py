@@ -12,9 +12,9 @@ from rca_echo_tools.constants import (
     SUFFIX,
     VARIABLES_TO_EXCLUDE,
     VARIABLES_TO_INCLUDE,
-    METADATA_JSON_BUCKET,
+    METADATA_JSON_BUCKET, 
 )
-from rca_echo_tools.utils import get_s3_kwargs, restore_logging_for_prefect
+from rca_echo_tools.utils import get_s3_kwargs, restore_logging_for_prefect, verify_subdeployment
 
 
 # we need to write to zarr at intervals instead of concatenating the whole thing TODO
@@ -32,13 +32,16 @@ def echo_raw_data_harvest(
     batch_size_days: int = 1,
 ):
     restore_logging_for_prefect()
-    # installed_packages = {dist.metadata["Name"]: dist.version for dist in distributions()}
-    # print(f"Installed packages: {installed_packages}")
 
     fs_kwargs = get_s3_kwargs()
     fs = fsspec.filesystem("s3", **fs_kwargs)
 
-    store_path = f"{data_bucket}/{refdes}-{SUFFIX}/"
+    start_dt = datetime.strptime(start_date, "%Y/%m/%d")
+    end_dt = datetime.strptime(end_date, "%Y/%m/%d")
+
+    subdeployment_id = verify_subdeployment(refdes, start_dt, end_dt)
+
+    store_path = f"{data_bucket}/{refdes}-{SUFFIX}/{subdeployment_id}"
     metadata_json_path = f"{METADATA_JSON_BUCKET}/harvest-status/{refdes}-{SUFFIX}/"
 
     days_strings = get_day_strings(start_date, end_date)
@@ -140,6 +143,7 @@ def echo_raw_data_harvest(
             waveform_mode=waveform_mode,
             encode_mode=encode_mode,
             sonar_model=sonar_model,
+            subdeployment_id=subdeployment_id,
             fs=fs,
             metadata_path=metadata_json_path,
         )
@@ -153,6 +157,7 @@ def update_metadata_json(
     waveform_mode: str,
     encode_mode: str,
     sonar_model: str,
+    subdeployment_id: str,
     fs: fsspec.filesystem,
     metadata_path: str,
 ):
@@ -162,6 +167,7 @@ def update_metadata_json(
             "waveform_mode": waveform_mode,
             "encode_mode": encode_mode,
             "sonar_model": sonar_model,
+            "subdeployment_id": subdeployment_id,
         }
         for day in metadata_day_keys
     }
@@ -234,3 +240,4 @@ def get_day_strings(start_date: str, end_date: str) -> list[str]:
         current += timedelta(days=1)
 
     return days
+

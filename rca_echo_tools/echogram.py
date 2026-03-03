@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from prefect import flow
 
-from rca_echo_tools.constants import SUFFIX, VIZ_BUCKET
-from rca_echo_tools.utils import load_data, restore_logging_for_prefect, get_s3_kwargs
+from rca_echo_tools.constants import SUBDEPLOYMENTS, SUFFIX, VIZ_BUCKET
+from rca_echo_tools.utils import load_data, restore_logging_for_prefect, get_s3_kwargs, find_subdeployment
 from rca_echo_tools.cloud import sync_png_to_s3
 
 plt.switch_backend("Agg")  # use non-interactive backend for plotting
@@ -35,6 +35,8 @@ def plot_daily_echogram(
     )
 
     dt = datetime.strptime(date, "%Y/%m/%d")  # python datetime format
+    subdeployment_id = find_subdeployment(refdes, dt, SUBDEPLOYMENTS[refdes])
+
     date_tag = date.replace("/", "")  # for file naming no '/'
 
     output_dir = Path("./output")
@@ -42,7 +44,7 @@ def plot_daily_echogram(
 
     instrument = refdes[-9:]
 
-    unbinned_ds = load_data(f"{refdes}-{SUFFIX}")
+    unbinned_ds = load_data(f"{refdes}-{SUFFIX}/{subdeployment_id}")
     unbinned_ds_day = unbinned_ds.sel(ping_time=slice(dt, dt + timedelta(days=1)))
 
     if len(unbinned_ds_day["ping_time"]) == 0:
@@ -73,7 +75,7 @@ def plot_daily_echogram(
 
     for ax, channel in zip(facet_grid.axes.flat, channels):
         ax.set_title(channel_labels[channel])
-        ax.set_xlabel("")  # remove ping time label
+        ax.set_xlabel("UTC")
         ax.set_ylabel("Vertical Range (m)")
 
     # Fix colorbar label

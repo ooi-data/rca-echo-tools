@@ -6,7 +6,8 @@ import sys
 import xarray as xr
 
 from prefect.exceptions import MissingContextError
-from rca_echo_tools.constants import DATA_BUCKET
+from datetime import datetime
+from rca_echo_tools.constants import DATA_BUCKET, SUBDEPLOYMENTS
 
 
 def select_logger():
@@ -59,3 +60,28 @@ def restore_logging_for_prefect():
     formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(name)s | %(message)s")
     handler.setFormatter(formatter)
     root.addHandler(handler)
+
+
+def find_subdeployment(refdes: str, date: datetime, deployments: dict) -> int:
+    for deployment_num, (start, end) in deployments.items():
+        start_dt = datetime.strptime(start, "%Y/%m/%d")
+        end_dt = datetime.strptime(end, "%Y/%m/%d") if end else datetime.max
+        if start_dt <= date <= end_dt:
+            return deployment_num
+    raise ValueError(f"No deployment found for {refdes} on {date.strftime('%Y/%m/%d')}")
+
+
+def verify_subdeployment(refdes: str, start_date: datetime, end_date: datetime) -> int:
+    deployments = SUBDEPLOYMENTS[refdes]
+    
+    start_deployment = find_subdeployment(refdes, start_date, deployments)
+    end_deployment = find_subdeployment(refdes, end_date, deployments)
+
+    if start_deployment != end_deployment:
+        raise ValueError(
+            f"Date range spans multiple deployments for {refdes}: "
+            f"{start_date.strftime('%Y/%m/%d')} is in deployment {start_deployment} "
+            f"but {end_date.strftime('%Y/%m/%d')} is in deployment {end_deployment}."
+        )
+
+    return str(start_deployment)
