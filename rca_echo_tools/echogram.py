@@ -73,9 +73,9 @@ def plot_daily_echogram(
         x="ping_time", row="channel", figsize=(18, 10), vmin=-100, vmax=-30, cmap=rs.roseus
     )
 
-    for ax, channel in zip(facet_grid.axes.flat, channels):
+    for i, (ax, channel) in enumerate(zip(facet_grid.axes.flat, channels)):
         ax.set_title(channel_labels[channel])
-        ax.set_xlabel("UTC") if ax.is_last_row() else ax.set_xlabel("")
+        ax.set_xlabel("UTC" if i == len(channels) - 1 else "")
         ax.set_ylabel("Vertical Range (m)")
 
     # Fix colorbar label
