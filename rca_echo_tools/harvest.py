@@ -68,7 +68,7 @@ def echo_raw_data_harvest(
             "delete existing store and run refesh again, or specify `--append` if you just wish to modify "
             "existing store."
         )
-    if run_type == "refresh":
+    if run_type == "refresh": # TODO TODO THIS should only happen if arg is passed otherwise we lose metadata whenver a new subdeployment is ingested
         print("WIPING EXISTING METADATA JSON")
         if fs.exists(metadata_json_path):
             fs.rm(metadata_json_path, recursive=True)
