@@ -17,8 +17,6 @@ from rca_echo_tools.constants import (
 from rca_echo_tools.utils import get_s3_kwargs, restore_logging_for_prefect, verify_subdeployment
 
 
-# we need to write to zarr at intervals instead of concatenating the whole thing TODO
-# batch processing pattern TODO
 @flow(log_prints=True)
 def echo_raw_data_harvest(
     start_date: str,
@@ -29,9 +27,13 @@ def echo_raw_data_harvest(
     sonar_model: str,
     data_bucket: str,
     run_type: str,
+    wipe_metadata_json: bool,
     batch_size_days: int = 1,
 ):
     restore_logging_for_prefect()
+    if wipe_metadata_json and run_type != "refresh":
+        raise ValueError("`--wipe-metadata-json` can only be used with `--run-type refresh`" \
+        " to avoid accidental metadata deletion.")
 
     fs_kwargs = get_s3_kwargs()
     fs = fsspec.filesystem("s3", **fs_kwargs)
@@ -68,7 +70,7 @@ def echo_raw_data_harvest(
             "delete existing store and run refesh again, or specify `--append` if you just wish to modify "
             "existing store."
         )
-    if run_type == "refresh": # TODO TODO THIS should only happen if arg is passed otherwise we lose metadata whenver a new subdeployment is ingested
+    if run_type == "refresh" and wipe_metadata_json:
         print("WIPING EXISTING METADATA JSON")
         if fs.exists(metadata_json_path):
             fs.rm(metadata_json_path, recursive=True)

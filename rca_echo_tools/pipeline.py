@@ -53,6 +53,13 @@ yesterday = yesterday_utc.strftime("%Y/%m/%d")
     default="append",
 )
 @click.option(
+    "--wipe-metadata-json",
+    is_flag=True,
+    default=False,
+    help="Flag to indicate if existing metadata JSON should be wiped before running harvest. "
+    "CAUTION - this will delete metadata for all subdeployments, not just the one being ingesting.",
+)
+@click.option(
     "--cloud",
     type=bool,
     default=False,
@@ -70,6 +77,7 @@ def run_echo_raw_data_harvest(
     run_type: str,
     batch_size_days: int = 2,
     cloud: bool = False,
+    wipe_metadata_json: bool = False,
 ) -> None:
 
     logger = select_logger()
@@ -86,6 +94,7 @@ def run_echo_raw_data_harvest(
             "sonar_model": sonar_model,
             "data_bucket": data_bucket,
             "run_type": run_type,
+            "wipe_metadata_json": wipe_metadata_json,
             "batch_size_days": batch_size_days,
         }
 
@@ -107,6 +116,7 @@ def run_echo_raw_data_harvest(
             sonar_model=sonar_model,
             data_bucket=data_bucket,
             run_type=run_type,
+            wipe_metadata_json=wipe_metadata_json,
             batch_size_days=batch_size_days,
         )
 
