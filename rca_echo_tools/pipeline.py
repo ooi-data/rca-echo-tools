@@ -212,5 +212,5 @@ def _run_local(params):
 
 
 if __name__ == "__main__":
-    run_echo_raw_data_harvest()
-    #run_daily_echograms()
+    #run_echo_raw_data_harvest()
+    run_daily_echograms()

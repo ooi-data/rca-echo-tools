@@ -68,6 +68,17 @@ def plot_daily_echogram(
             if freq in ch:
                 channel_labels[ch] = label
 
+    # Sort channels by numeric frequency (low to high)
+    def extract_freq(ch):
+        for freq in freq_map:
+            if freq in ch:
+                return int(freq)
+        return float("inf")  # unknown channels go last
+
+    channels = sorted(channels, key=extract_freq)
+    ds_MVBS = ds_MVBS.sel(channel=channels)
+
+
     print("Plotting downsampled array.")
     facet_grid = ds_MVBS["Sv"].plot(
         x="ping_time", row="channel", figsize=(18, 10), vmin=-100, vmax=-30, cmap=rs.roseus
