@@ -15,7 +15,7 @@ pull:
     branch: main
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
-- name: echo_raw_data_harvest_8vcpu_60gb
+- name: echo_raw_data_harvest_8vcpu_60gb_
   version:
   tags: []
   description:
