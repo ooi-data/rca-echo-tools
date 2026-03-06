@@ -27,13 +27,9 @@ def echo_raw_data_harvest(
     sonar_model: str,
     data_bucket: str,
     run_type: str,
-    wipe_metadata_json: bool,
     batch_size_days: int = 1,
 ):
     restore_logging_for_prefect()
-    if wipe_metadata_json and run_type != "refresh":
-        raise ValueError("`--wipe-metadata-json` can only be used with `--run-type refresh`" \
-        " to avoid accidental metadata deletion.")
 
     fs_kwargs = get_s3_kwargs()
     fs = fsspec.filesystem("s3", **fs_kwargs)
@@ -44,7 +40,7 @@ def echo_raw_data_harvest(
     subdeployment_id = verify_subdeployment(refdes, start_dt, end_dt)
 
     store_path = f"{data_bucket}/{refdes}-{SUFFIX}/{subdeployment_id}"
-    metadata_json_path = f"{METADATA_JSON_BUCKET}/harvest-status/{refdes}-{SUFFIX}/"
+    metadata_json_path = f"{METADATA_JSON_BUCKET}/harvest-status/{refdes}-{SUFFIX}/{subdeployment_id}"
 
     days_strings = get_day_strings(start_date, end_date)
 
@@ -70,8 +66,8 @@ def echo_raw_data_harvest(
             "delete existing store and run refesh again, or specify `--append` if you just wish to modify "
             "existing store."
         )
-    if run_type == "refresh" and wipe_metadata_json:
-        print("WIPING EXISTING METADATA JSON")
+    if run_type == "refresh":
+        print(f"WIPING EXISTING METADATA JSON for subdeployment {subdeployment_id}")
         if fs.exists(metadata_json_path):
             fs.rm(metadata_json_path, recursive=True)
 
