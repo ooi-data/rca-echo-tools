@@ -55,6 +55,6 @@ deployments:
     name: hydrophone-pool
     work_queue_name:
     job_variables:
-      image: public.ecr.aws/p0l4c7i2/rca-echo-tools:latestf
+      image: public.ecr.aws/p0l4c7i2/rca-echo-tools:latest
   schedule:
   is_schedule_active:
