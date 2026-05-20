@@ -37,8 +37,18 @@ rca-daily-echograms --refdes "CE04OSPS-PC01B-05-ZPLSCB102" \
 --s3-sync "True"
 ```
 
-# EK80 deployment configuration nodes 
+# S3 storage locations
+
+| Data | Bucket | Path pattern |
+|------|--------|--------------|
+| Zarr data store | `s3://ooi-data` | `{refdes}-streamed-zplsc_volume_scattering/{subdeployment_id}` |
+| Harvest status metadata JSON | `s3://flow-process-bucket` | `harvest-status/{refdes}-streamed-zplsc_volume_scattering/{subdeployment_id}` |
+| Echogram PNGs | `s3://ooi-rca-qaqc-prod` | `echograms/{year}/{instrument}/` |
+
+`subdeployment_id` is an integer defined in `rca_echo_tools/config/processing_deployments.yaml` that groups date ranges sharing the same EK80 configuration.
+
+# EK80 deployment configuration notes 
 Oregon Shelf system `CE02SHBP-MJ01C-07-ZPLSCB101` was running in CW mode for almost all of the 2024-2025 deployment. 
 The Offshore system `CE04OSPS-PC01B-05-ZPLSCB102` was in CW for the first week or so and then in limited FM mode.
 
-Both systems were put into alternating CW/FM between `2026-05-30` and `2025-07-18`.
+Both systems were put into alternating CW/FM between `2025-05-30` and `2025-07-18`.
