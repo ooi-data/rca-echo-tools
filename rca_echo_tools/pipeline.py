@@ -89,12 +89,15 @@ def run_echo_raw_data_harvest(
             "batch_size_days": batch_size_days,
         }
 
-        run_deployment(
+        # block until the zarr write finishes so the prefect echo chain can gate echograms on it
+        flow_run = run_deployment(
             name=f"echo-raw-data-harvest/{DEFAULT_HARVEST_DEPLOYMENT}",
             parameters=params,
             flow_run_name=run_name,
-            timeout=12,
+            timeout=None,
         )
+        if not flow_run.state.is_completed():
+            raise RuntimeError(f"{run_name} harvest ended in {flow_run.state.name}")
 
     else:
         logger.info(f"Launching pipeline locally for {run_name}")

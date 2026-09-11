@@ -1,6 +1,7 @@
 import roseus.mpl as rs
 import echopype as ep
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -84,10 +85,14 @@ def plot_daily_echogram(
         x="ping_time", row="channel", figsize=(18, 10), vmin=-90, vmax=-40, cmap=rs.roseus
     )
 
+    # fixed 0000-2400 axis
     for i, (ax, channel) in enumerate(zip(facet_grid.axes.flat, channels)):
         ax.set_title(channel_labels[channel])
-        ax.set_xlabel("UTC" if i == len(channels) - 1 else "")
+        ax.set_xlabel(f"UTC ({date})" if i == len(channels) - 1 else "")
         ax.set_ylabel("Vertical Range (m)")
+        ax.set_xlim(dt, dt + timedelta(days=1))
+        ax.xaxis.set_major_locator(mdates.HourLocator(interval=3))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 
     # Fix colorbar label
     facet_grid.cbar.set_label("Sv (dB re 1 m$^{-1}$)")
