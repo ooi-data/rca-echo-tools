@@ -3,14 +3,12 @@ import click
 from prefect.deployments import run_deployment
 from datetime import datetime, timedelta, timezone
 
-from rca_echo_tools.harvest import echo_raw_data_harvest
 from rca_echo_tools.constants import (
     DATA_BUCKET,
     DEFAULT_HARVEST_DEPLOYMENT,
     ECHOGRAM_INFRA_CONFIG,
 )
 from rca_echo_tools.utils import select_logger
-from rca_echo_tools.echogram import plot_daily_echogram
 
 # get yesterday's date in YYYY/MM/DD format
 now_utc = datetime.now(timezone.utc)
@@ -100,6 +98,9 @@ def run_echo_raw_data_harvest(
             raise RuntimeError(f"{run_name} harvest ended in {flow_run.state.name}")
 
     else:
+        # imported here so cloud dispatch needs only prefect, not echopype
+        from rca_echo_tools.harvest import echo_raw_data_harvest
+
         logger.info(f"Launching pipeline locally for {run_name}")
         echo_raw_data_harvest(
             start_date=start_date,
@@ -201,6 +202,8 @@ def _run_cloud(params):
 
 
 def _run_local(params):
+    from rca_echo_tools.echogram import plot_daily_echogram
+
     plot_daily_echogram(**params)
 
 

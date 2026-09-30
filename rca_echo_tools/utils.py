@@ -1,9 +1,6 @@
 import os
-import s3fs
 import logging
 import sys
-
-import xarray as xr
 
 from prefect.exceptions import MissingContextError
 from datetime import datetime
@@ -36,6 +33,10 @@ def get_s3_kwargs():
 
 
 def load_data(stream_name: str):
+    # s3fs/xarray imported here so pipeline.py can use select_logger without them
+    import s3fs
+    import xarray as xr
+
     fs = s3fs.S3FileSystem(**get_s3_kwargs())
     zarr_dir = f"{DATA_BUCKET}/{stream_name}"
     print(f"loading zarr metadata from {zarr_dir}")

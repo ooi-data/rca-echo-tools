@@ -1,0 +1,7 @@
+# Minimal env for rca-echo-harvest --cloud / rca-daily-echograms --parallel-in-cloud, which only
+# dispatch to the ECS deployments. QAQC_dashboard installs this, plus this package with
+# --no-deps for the entry points, instead of pulling the full image.
+prefect==3.8.6 # same as ooi-hyd-tools dispatch; both hit the same Cloud workspace
+click==8.1.8 # pyproject pin
+pyyaml
+loguru

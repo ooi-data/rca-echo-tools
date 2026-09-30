@@ -1,0 +1,21 @@
+name: dispatch-check
+
+# QAQC_dashboard dispatches prefect runs from ci/requirements-dispatch.txt, not the full image.
+# Fails if pipeline.py picks up an import that bare env can't satisfy.
+on:
+  pull_request:
+    paths:
+      - "rca_echo_tools/**.py"
+      - "rca_echo_tools/config/**"
+      - "ci/requirements-dispatch.txt"
+      - "pyproject.toml"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv venv --python 3.11 && uv pip install -r ci/requirements-dispatch.txt && uv pip install --no-deps .
+      - run: .venv/bin/rca-echo-harvest --help && .venv/bin/rca-daily-echograms --help
